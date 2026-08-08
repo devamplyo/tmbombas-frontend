@@ -1,0 +1,30 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.6rem;
+}
+
+.productCard {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 0.8rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  transition: border-color 0.15s;
+}
+.productCard:hover { border-color: hsl(var(--primary) / 0.6); }
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+}

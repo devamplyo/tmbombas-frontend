@@ -1,0 +1,58 @@
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.icon.primary {
+  background: hsl(var(--primary) / 0.15);
+  color: hsl(var(--primary));
+}
+.icon.success {
+  background: hsl(var(--success) / 0.15);
+  color: hsl(var(--success));
+}
+.icon.warning {
+  background: hsl(var(--warning) / 0.18);
+  color: hsl(var(--warning));
+}
+.icon.danger {
+  background: hsl(var(--destructive) / 0.15);
+  color: hsl(var(--destructive));
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.78rem;
+  color: hsl(220 18% 78%);
+}
+
+.value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: hsl(220 18% 75%);
+  margin-top: 0.15rem;
+}

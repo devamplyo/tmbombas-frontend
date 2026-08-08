@@ -1,0 +1,54 @@
+.rolesLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: hsl(220 18% 82%);
+  margin-bottom: 0.6rem;
+}
+
+.rolesHint {
+  font-weight: 400;
+  color: hsl(220 15% 65%);
+  font-size: 0.75rem;
+}
+
+.rolesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .rolesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.roleCard {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.roleCard:hover {
+  background: hsl(var(--secondary) / 0.5);
+}
+
+.roleCard input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: hsl(var(--primary));
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.roleChecked {
+  border-color: hsl(var(--primary) / 0.7);
+  background: hsl(var(--primary) / 0.08);
+}

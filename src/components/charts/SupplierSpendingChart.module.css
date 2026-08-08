@@ -1,0 +1,80 @@
+.chartBox {
+  position: relative;
+  max-width: 620px;
+}
+
+.svg {
+  width: 100%;
+  display: block;
+}
+
+.rowLabel {
+  fill: hsl(var(--muted-foreground));
+  font-size: 10px;
+}
+
+.bar {
+  fill: hsl(var(--destructive));
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.15s ease;
+}
+.barActive {
+  transform: scaleY(1.12) scaleX(1.01);
+  filter: brightness(1.18);
+}
+.barPinned {
+  stroke: hsl(var(--card));
+  stroke-width: 2px;
+  paint-order: stroke;
+}
+
+.hitArea {
+  cursor: pointer;
+}
+.hitArea:focus,
+.hitArea:focus-visible {
+  outline: none;
+}
+
+.tooltip {
+  position: absolute;
+  transform: translateY(-4px);
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  min-width: 150px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 5;
+  animation: tooltipIn 0.14s ease-out;
+}
+.tooltipPinned {
+  border-color: hsl(var(--primary) / 0.55);
+}
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(0) translateX(4px) scale(0.95); }
+  to { opacity: 1; transform: translateY(-4px) translateX(0) scale(1); }
+}
+
+.tooltipName {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.15rem;
+}
+
+.tooltipHint {
+  display: block;
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.1rem;
+}
+
+.empty {
+  padding: 2rem 0;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.85rem;
+}

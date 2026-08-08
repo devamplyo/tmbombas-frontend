@@ -1,0 +1,80 @@
+.calHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  text-transform: capitalize;
+  font-size: 0.95rem;
+}
+
+.navBtn {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+}
+.navBtn:hover {
+  background: hsl(var(--secondary) / 0.5);
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.4rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.day {
+  position: relative;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: hsl(var(--foreground));
+  font-size: 0.85rem;
+  padding: 0.55rem 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+.day:hover {
+  background: hsl(var(--secondary) / 0.5);
+}
+
+.outside {
+  color: hsl(var(--muted-foreground) / 0.5);
+}
+
+.today {
+  border: 1px solid hsl(var(--primary) / 0.6);
+}
+
+.selected {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.selected:hover {
+  background: hsl(var(--primary));
+}
+
+.dot {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+}

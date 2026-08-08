@@ -1,0 +1,72 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s, transform 0.05s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Tamanhos */
+.md {
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+}
+.sm {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+/* Variantes */
+.primary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.primary:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.88);
+}
+
+.secondary {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+.secondary:hover:not(:disabled) {
+  background: hsl(var(--secondary) / 0.8);
+}
+
+.outline {
+  background: transparent;
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+.outline:hover:not(:disabled) {
+  background: hsl(var(--secondary) / 0.5);
+}
+
+.ghost {
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+.ghost:hover:not(:disabled) {
+  background: hsl(var(--secondary) / 0.5);
+}
+
+.danger {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+.danger:hover:not(:disabled) {
+  background: hsl(var(--destructive) / 0.85);
+}

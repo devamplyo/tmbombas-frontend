@@ -1,0 +1,8 @@
+.spinner {
+  display: inline-block;
+  border-style: solid;
+  border-color: hsl(var(--border));
+  border-top-color: hsl(var(--primary));
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
