@@ -21,7 +21,7 @@ export default function ProfileSelector() {
             <Droplet size={26} />
           </div>
           <div>
-            <h1>TH Bombas</h1>
+            <h1>TM Bombas</h1>
             <p>Selecione seu perfil de acesso</p>
           </div>
         </header>

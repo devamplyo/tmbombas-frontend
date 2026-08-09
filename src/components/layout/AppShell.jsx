@@ -73,7 +73,7 @@ export default function AppShell({ profileKey }) {
             <Droplet size={20} />
           </div>
           <div>
-            <strong>TH Bombas</strong>
+            <strong>TM Bombas</strong>
             <span className={styles.brandSub}>{profile.label}</span>
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function AppShell({ profileKey }) {
       <header className={styles.mobileHeader}>
         <div className={styles.brandMobile}>
           <Droplet size={18} />
-          <strong>TH Bombas</strong>
+          <strong>TM Bombas</strong>
         </div>
         <button className={styles.menuToggle} onClick={() => setMobileOpen(true)} aria-label="Menu">
           <Menu size={22} />

@@ -35,7 +35,7 @@ export default function Login() {
           <div className={styles.logo}>
             <Droplet size={28} />
           </div>
-          <h1>TH Bombas</h1>
+          <h1>TM Bombas</h1>
           <p>Sistema de Gestão Integrada</p>
         </div>
 
