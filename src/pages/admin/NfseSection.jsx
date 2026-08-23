@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import { Textarea } from '@/components/ui/Field';
+import { getToken } from '@/api/auth';
 
 const STATUS = {
   processando: { label: 'Processando…', tone: 'warning' },
@@ -15,6 +16,13 @@ const STATUS = {
 };
 
 const JUSTIFICATIVA_MIN = 15;
+
+// These calls don't go through client.js's `req()`, so they attach the session
+// token themselves — without it the backend rejects /api/nfse/** with 403.
+const authHeaders = (extra = {}) => {
+  const token = getToken();
+  return token ? { ...extra, Authorization: `Bearer ${token}` } : extra;
+};
 
 /**
  * NFS-e issuance section shown in the detail of a completed service order.
@@ -40,12 +48,13 @@ export default function NfseSection({ os }) {
     let active = true;
     (async () => {
       try {
-        const res = await fetch('/api/nfse/status');
+        const res = await fetch('/api/nfse/status', { headers: authHeaders() });
         const s = await res.json();
         if (active) setNfseStatus(s);
       } catch { if (active) setNfseStatus({ configured: false }); }
       try {
-        const r = await fetch('/api/nfse?service_order_id=' + encodeURIComponent(os.id));
+        const r = await fetch('/api/nfse?service_order_id=' + encodeURIComponent(os.id),
+          { headers: authHeaders() });
         if (r.ok) {
           const list = await r.json();
           if (active && list.length) setInvoice(list[0]);
@@ -70,7 +79,7 @@ export default function NfseSection({ os }) {
     try {
       const res = await fetch('/api/nfse/emit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ service_order_id: os.id }),
       });
       const body = await res.json();
@@ -95,7 +104,7 @@ export default function NfseSection({ os }) {
   const consult = async () => {
     if (!invoice) return;
     try {
-      const res = await fetch(`/api/nfse/${invoice.id}/consult`);
+      const res = await fetch(`/api/nfse/${invoice.id}/consult`, { headers: authHeaders() });
       const body = await res.json();
       if (res.ok) setInvoice(body);
     } catch { /* tries again on the next cycle */ }
@@ -107,7 +116,7 @@ export default function NfseSection({ os }) {
     try {
       const res = await fetch(`/api/nfse/${invoice.id}/cancel`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ justificativa: justificativa.trim() }),
       });
       const body = await res.json();
