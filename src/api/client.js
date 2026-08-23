@@ -795,3 +795,30 @@ export async function approveExternalOrder(id) {
 export async function rejectExternalOrder(id, reason) {
   return decodeExternalOrder(await req('POST', `/external-orders/${id}/reject`, { reason }));
 }
+
+/* ─────────────────────────  Contas a receber  ───────────────────────── */
+
+/**
+ * Receivables from the backend (`/admin/receivables`). Sources: sales and
+ * completed service orders. The backend already returns the total summed.
+ *
+ * Financeiro used to filter service orders by a `payment_status` field that only
+ * existed on the front — the backend never had it, so confirming never persisted.
+ */
+export async function getReceivables(status = 'PENDENTE') {
+  try {
+    const r = await req('GET', `/admin/receivables${status ? `?status=${status}` : ''}`);
+    return { receivables: r?.receivables || [], total: Number(r?.total) || 0 };
+  } catch (e) {
+    console.error('[API] falha ao listar contas a receber:', e.message);
+    return { receivables: [], total: 0 };
+  }
+}
+
+/** Confirms receipt. Both fields are optional — the backend defaults to today. */
+export async function confirmReceivable(id, { paymentMethod, receivedDate } = {}) {
+  return req('POST', `/admin/receivables/${id}/confirm`, clean({
+    payment_method: paymentMethod || undefined,
+    received_date: receivedDate || undefined,
+  }));
+}

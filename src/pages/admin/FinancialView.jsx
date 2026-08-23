@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
 import { startOfWeek, startOfMonth, format } from 'date-fns';
-import { db, getFinancialFlow, getSupplierSpending } from '@/api/client';
+import {
+  db, getFinancialFlow, getSupplierSpending,
+  getReceivables, confirmReceivable as confirmReceivableApi,
+} from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import PageHeader from '@/components/ui/PageHeader';
 import Stat from '@/components/ui/Stat';
@@ -25,6 +28,9 @@ const GRANULARIDADES = [
 
 const fmt = (d) => format(d, 'yyyy-MM-dd');
 
+/** ReceivableStatus (backend) → key of PAYMENT_STATUS, which drives the badge. */
+const STATUS_BADGE = { PENDENTE: 'a_receber', RECEBIDO: 'recebido' };
+
 /** Start of the period (today/week/month) through today, to filter the spending-by-supplier chart. */
 function rangeFor(period) {
   const today = new Date();
@@ -39,12 +45,12 @@ export default function FinancialView() {
   const [granularidade, setGranularidade] = useState('MES');
 
   const { data, loading, reload } = useAsyncData(async () => {
-    const [sales, stockEntries, orders] = await Promise.all([
+    const [sales, stockEntries, pending] = await Promise.all([
       db.Sale.filter({ status: 'consolidada' }),
       db.StockEntry.list('-entry_date'),
-      db.ServiceOrder.list('-created_date'),
+      getReceivables('PENDENTE'),
     ]);
-    return { sales, stockEntries, orders };
+    return { sales, stockEntries, pending };
   }, []);
 
   const { data: flow, loading: flowLoading } = useAsyncData(
@@ -59,19 +65,25 @@ export default function FinancialView() {
     [spendPeriod],
   );
 
-  const confirmReceivable = async (order) => {
-    await db.ServiceOrder.update(order.id, { payment_status: 'recebido' });
-    toast.success('Recebimento confirmado.');
-    reload();
+  const confirmReceivable = async (r) => {
+    try {
+      await confirmReceivableApi(r.id);
+      toast.success('Recebimento confirmado.');
+      reload();
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível confirmar o recebimento.');
+    }
   };
 
   if (loading) return <div className={shared.loading}><Spinner /></div>;
-  const { sales, stockEntries, orders } = data;
+  const { sales, stockEntries, pending } = data;
 
   const totalRevenue = sales.reduce((s, x) => s + (x.total_amount || 0), 0);
   const totalExpenses = stockEntries.reduce((s, x) => s + (x.total_cost || 0), 0);
-  const receivable = orders.filter((o) => o.payment_status === 'a_receber' && o.status === 'concluida');
-  const receivableTotal = receivable.reduce((s, o) => s + (o.service_value || 0), 0);
+  // Comes from the backend (/admin/receivables): sales on credit and completed
+  // service orders. The total is summed server-side.
+  const receivable = pending.receivables;
+  const receivableTotal = pending.total;
 
   return (
     <div>
@@ -149,13 +161,19 @@ export default function FinancialView() {
         <CardBody style={{ padding: 0 }}>
           <Table
             columns={[
-              { key: 'client_name', header: 'Cliente' },
-              { key: 'description', header: 'Descrição', render: (r) => r.description.slice(0, 60) },
-              { key: 'service_value', header: 'Valor', align: 'right', render: (r) => brl(r.service_value) },
-              { key: 'payment_status', header: 'Status', render: (r) => <Badge tone={PAYMENT_STATUS[r.payment_status]?.tone}>{PAYMENT_STATUS[r.payment_status]?.label}</Badge> },
+              { key: 'client_name', header: 'Cliente', render: (r) => r.client_name || '—' },
+              { key: 'description', header: 'Descrição', render: (r) => (r.description || '').slice(0, 60) },
+              { key: 'amount', header: 'Valor', align: 'right', render: (r) => brl(r.amount) },
+              {
+                key: 'status', header: 'Status',
+                render: (r) => {
+                  const s = STATUS_BADGE[r.status] || 'a_receber';
+                  return <Badge tone={PAYMENT_STATUS[s]?.tone}>{PAYMENT_STATUS[s]?.label}</Badge>;
+                },
+              },
               {
                 key: 'actions', header: '', align: 'right',
-                render: (r) => r.payment_status === 'a_receber'
+                render: (r) => r.status === 'PENDENTE'
                   ? <Button size="sm" variant="outline" onClick={() => confirmReceivable(r)}>Confirmar</Button>
                   : null,
               },
