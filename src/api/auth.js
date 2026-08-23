@@ -44,7 +44,6 @@ function getRefreshToken() {
 }
 
 export async function login(matricula, password) {
-  console.log(`[AUTH] Tentativa de login - matricula=${matricula}`);
   const res = await fetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -53,11 +52,9 @@ export async function login(matricula, password) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     const message = err.error || err.erro || err.message || 'Falha no login.';
-    console.warn(`[AUTH] Login falhou - matricula=${matricula} status=${res.status} motivo=${message}`);
     throw new Error(message);
   }
   const data = await res.json();
-  console.log(`[AUTH] Login bem-sucedido - matricula=${data.matricula} perfil=${data.perfil}`);
   saveSession(data.token, data.refresh);
   return me();
 }
@@ -77,19 +74,16 @@ export async function refresh() {
     body: JSON.stringify({ refresh_token: refreshToken }),
   });
   if (!res.ok) {
-    console.warn(`[AUTH] refresh() falhou - status=${res.status}`);
     throw new Error('Não foi possível renovar a sessão.');
   }
   const data = await res.json();
   saveSession(data.token, data.refresh);
-  console.log('[AUTH] Sessão renovada silenciosamente');
   return data.token;
 }
 
 export async function me() {
   const token = getToken();
   if (!token) {
-    console.log('[AUTH] me() sem token salvo - usuário não autenticado');
     return null;
   }
 
@@ -97,18 +91,15 @@ export async function me() {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
-    console.warn(`[AUTH] me() falhou - status=${res.status}, deslogando`);
     logout();
     return null;
   }
   const data = await res.json();
   const user = normalizeUser(data);
-  console.log(`[AUTH] Sessão válida - matricula=${user.matricula} role=${user.role}`);
   return user;
 }
 
 export function logout() {
-  console.log('[AUTH] Logout');
   const token = getToken();
   const refreshToken = getRefreshToken();
   localStorage.removeItem(SESSION_KEY);

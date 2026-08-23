@@ -23,7 +23,6 @@ async function req(method, url, body) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const start = performance.now();
-  console.log(`[API] -> ${method} ${url}`, body !== undefined ? body : '(sem corpo)');
 
   const res = await fetch(BASE + url, {
     method,
@@ -55,7 +54,6 @@ async function req(method, url, body) {
   // DELETE usually returns 204 with no body - res.json() would break parsing it.
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
-  console.log(`[API] <- ${method} ${url} ${res.status} (${duration}ms)`, data);
   return data;
 }
 

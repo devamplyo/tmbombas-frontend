@@ -14,7 +14,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // 100% Java — Node aposentado
-      '/api': 'http://localhost:8080',
+      '/api': 'http://localhost:4015',
     },
   },
 })

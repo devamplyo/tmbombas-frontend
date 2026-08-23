@@ -1,0 +1,38 @@
+services:
+
+  th_piscinas_frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: th_piscinas_frontend
+    restart: unless-stopped
+    environment:
+      # Nome do serviço/host do backend Java, visto de dentro da rede
+      # docker. Se o backend (tmbombas-backend) estiver rodando via
+      # docker-compose, o container dele se chama "th_piscinas_api" e
+      # escuta na porta 4015 — é o default abaixo.
+      API_BACKEND_URL: ${API_BACKEND_URL:-http://th_piscinas_api:4015}
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
+    networks:
+      - default
+      - th_piscinas_backend_net
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:80/ || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  # Rede default criada pelo docker-compose do backend (tmbombas-backend/).
+  # O nome segue o padrão "<pasta-do-projeto>_default" do Compose; ajuste
+  # aqui caso o projeto do backend tenha sido subido com outro nome
+  # (ex.: via COMPOSE_PROJECT_NAME) ou rode em outra rede.
+  #
+  # Se preferir não depender da rede do backend, remova este bloco e a
+  # referência a "th_piscinas_backend_net" acima, e aponte API_BACKEND_URL
+  # para um endereço acessível (ex.: http://host.docker.internal:4015).
+  th_piscinas_backend_net:
+    name: tmbombas-backend_default
+    external: true

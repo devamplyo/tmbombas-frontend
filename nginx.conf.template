@@ -1,0 +1,48 @@
+server {
+    listen 80;
+    listen [::]:80;  
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    # DNS embutido do Docker: resolve nomes de outros containers/serviços.
+    # Necessário para o proxy_pass abaixo, que usa uma variável em vez de
+    # host fixo — assim o nginx resolve em tempo de requisição, e não
+    # falha ao subir caso o backend ainda não esteja de pé.
+    resolver 127.0.0.11 valid=10s;
+
+    # Proxy para o backend Java (TH Piscinas API).
+    # API_BACKEND_URL é resolvido em build/run pelo entrypoint do nginx
+    # (envsubst sobre este template) a partir da variável de ambiente
+    # de mesmo nome definida no Dockerfile/docker-compose.
+    location /api/ {
+        set $backend_upstream "${API_BACKEND_URL}";
+        # $request_uri (não $uri) preserva o path original completo (com
+        # query string) — o backend Java também espera o prefixo /api/.
+        proxy_pass $backend_upstream$request_uri;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Assets com hash no nome (Vite) podem ter cache longo.
+    location ~* \.(?:js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico)$ {
+        expires 7d;
+        access_log off;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # SPA: qualquer rota não encontrada cai no index.html (React Router).
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

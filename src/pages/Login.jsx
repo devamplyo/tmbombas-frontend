@@ -64,13 +64,6 @@ export default function Login() {
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>
-
-        <div className={styles.hint}>
-          <span>Acesso de teste:</span>
-          <code>vint / 123</code> · <code>vext / 123</code> · <code>tec / 123</code>
-          <br />
-          <small>Admin: matrícula/senha configuradas em ADMIN_MATRICULA / ADMIN_SENHA no .env do backend.</small>
-        </div>
       </div>
     </div>
   );
