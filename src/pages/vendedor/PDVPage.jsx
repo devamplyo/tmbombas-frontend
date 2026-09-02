@@ -75,8 +75,12 @@ export default function PDVPage() {
         const prod = (products || []).find((p) => p.id === item.product_id);
         if (prod && prod.stock_quantity < item.quantity) throw new Error(`Estoque insuficiente: ${item.product_name}`);
       }
+      // achado F3: o payload nunca incluía a forma de pagamento escolhida —
+      // toda venda virava "Dinheiro" no lançamento financeiro, e a coluna
+      // Pagamento em Vendas do dia sempre mostrava "—".
       const sale = await db.Sale.create({
         client_name: clientName,
+        payment_method: payment,
         items: cart,
       });
       setLastSale({ id: sale.id, client_name: clientName, items: cart, total: totalAmount, date: new Date() });

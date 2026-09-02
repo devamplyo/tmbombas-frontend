@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, X, Eye } from 'lucide-react';
-import { db } from '@/api/client';
+import { db, getReceivables, confirmReceivable } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
@@ -24,8 +24,12 @@ const TABS = [
 export default function ServiceOrdersPage() {
   const toast = useToast();
   const { data, loading, reload } = useAsyncData(async () => {
-    const [orders, clients] = await Promise.all([db.ServiceOrder.list('-created_date'), db.Client.list()]);
-    return { orders, clients };
+    const [orders, clients, pending] = await Promise.all([
+      db.ServiceOrder.list('-created_date'),
+      db.Client.list(),
+      getReceivables('PENDENTE'),
+    ]);
+    return { orders, clients, receivables: pending.receivables };
   }, []);
   const [detail, setDetail] = useState(null);
   const [tab, setTab] = useState('aguardando');
@@ -37,11 +41,22 @@ export default function ServiceOrdersPage() {
     setDetail(null);
   };
 
-  const setPayment = async (id, payment_status) => {
-    await db.ServiceOrder.update(id, { payment_status });
-    toast.success('Pagamento atualizado.');
-    reload();
-    if (detail?.id === id) setDetail({ ...detail, payment_status });
+  // achado F22: "payment_status" de ServiceOrder é um campo morto (o backend
+  // não modela pagamento nessa entidade) — a fonte de verdade é o mesmo
+  // sistema Receivable que o Financeiro usa. Acha a conta a receber pendente
+  // vinculada a esta OS (se existir) em vez de gravar num campo que não persiste.
+  const receivableFor = (orderId) =>
+    data.receivables.find((rv) => rv.source_type === 'ORDEM_SERVICO' && rv.source_id === orderId);
+
+  const confirmPayment = async (receivableId) => {
+    try {
+      await confirmReceivable(receivableId);
+      toast.success('Recebimento confirmado.');
+      reload();
+      setDetail(null);
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível confirmar o recebimento.');
+    }
   };
 
   if (loading) return <div className={shared.loading}><Spinner /></div>;
@@ -108,7 +123,13 @@ export default function ServiceOrdersPage() {
               <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Tipo</span><br /><strong>{detail.type === 'os' ? 'Ordem de Serviço' : 'Orçamento'}</strong></div>
               <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Status</span><br /><Badge tone={OS_STATUS[detail.status]?.tone}>{OS_STATUS[detail.status]?.label}</Badge></div>
               <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Valor</span><br /><strong>{brl(detail.service_value)}</strong></div>
-              <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Pagamento</span><br /><Badge tone={PAYMENT_STATUS[detail.payment_status]?.tone}>{PAYMENT_STATUS[detail.payment_status]?.label}</Badge></div>
+              {detail.status === 'concluida' && (
+                <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Pagamento</span><br />
+                  <Badge tone={PAYMENT_STATUS[receivableFor(detail.id) ? 'a_receber' : 'recebido'].tone}>
+                    {PAYMENT_STATUS[receivableFor(detail.id) ? 'a_receber' : 'recebido'].label}
+                  </Badge>
+                </div>
+              )}
               <div style={{ gridColumn: '1/-1' }}><span style={{ color: 'hsl(var(--muted-foreground))' }}>Descrição</span><br />{detail.description}</div>
               {detail.assigned_to_name && <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Técnico</span><br />{detail.assigned_to_name}</div>}
               <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Agendado</span><br />{dateBR(detail.scheduled_date)} {detail.scheduled_time || ''}</div>
@@ -127,8 +148,8 @@ export default function ServiceOrdersPage() {
               </div>
             )}
 
-            {detail.payment_status === 'a_receber' && detail.status === 'concluida' && (
-              <Button variant="outline" onClick={() => setPayment(detail.id, 'recebido')}>Confirmar recebimento</Button>
+            {detail.status === 'concluida' && receivableFor(detail.id) && (
+              <Button variant="outline" onClick={() => confirmPayment(receivableFor(detail.id).id)}>Confirmar recebimento</Button>
             )}
 
             <NfseSection os={detail} />

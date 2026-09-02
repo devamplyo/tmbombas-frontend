@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Check, X, User } from 'lucide-react';
-import { db, getMaintenancePlans } from '@/api/client';
+import { db, getMaintenancePlans, approveClient, rejectClient } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
@@ -48,8 +48,11 @@ export default function ClientsPage() {
     setOpen(true);
   };
 
+  // achado F11: o backend exige documento (@NotBlank, único), mas o
+  // formulário não avisava — o erro só chegava cru depois do 400 do servidor.
   const save = async () => {
     if (!form.name.trim()) return toast.error('Informe o nome do cliente.');
+    if (!form.document.trim()) return toast.error('Informe o documento (CPF/CNPJ).');
     try {
       if (editingId) {
         await db.Client.update(editingId, form);
@@ -65,10 +68,32 @@ export default function ClientsPage() {
     }
   };
 
-  const setValidation = async (client, status) => {
-    await db.Client.update(client.id, { validation_status: status });
-    toast.success(status === 'ativo' ? 'Cliente aprovado.' : 'Cliente rejeitado.');
-    reload();
+  const [rejecting, setRejecting] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
+
+  const approve = async (client) => {
+    try {
+      await approveClient(client.id);
+      toast.success('Cliente aprovado.');
+      reload();
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível aprovar o cliente.');
+    }
+  };
+
+  const openReject = (client) => { setRejecting(client); setRejectReason(''); };
+  const closeReject = () => { setRejecting(null); setRejectReason(''); };
+
+  const confirmReject = async () => {
+    if (!rejecting || !rejectReason.trim()) return;
+    try {
+      await rejectClient(rejecting.id, rejectReason.trim());
+      toast.success('Cliente rejeitado.');
+      closeReject();
+      reload();
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível rejeitar o cliente.');
+    }
   };
 
   if (loading) return <div className={shared.loading}><Spinner /></div>;
@@ -106,10 +131,10 @@ export default function ClientsPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {r.validation_status === 'aguardando_validacao' && (
                       <>
-                        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setValidation(r, 'ativo'); }}>
+                        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); approve(r); }}>
                           <Check size={14} /> Aprovar
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setValidation(r, 'rejeitado'); }}>
+                        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); openReject(r); }}>
                           <X size={14} />
                         </Button>
                       </>
@@ -144,12 +169,34 @@ export default function ClientsPage() {
           <Select label="Tipo" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
             {Object.entries(CLIENT_TYPE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </Select>
-          <Input label="Documento (CPF/CNPJ)" value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} />
+          <Input label="Documento (CPF/CNPJ)*" value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} />
           <Input label="E-mail" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <Input label="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           <Input label="Cidade" value={form.city_name} onChange={(e) => setForm({ ...form, city_name: e.target.value })} />
           <Input label="UF" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
         </div>
+      </Modal>
+
+      <Modal
+        open={!!rejecting}
+        onClose={closeReject}
+        title="Rejeitar cliente"
+        footer={
+          <>
+            <Button variant="ghost" onClick={closeReject}>Fechar</Button>
+            <Button variant="danger" onClick={confirmReject} disabled={!rejectReason.trim()}>Confirmar rejeição</Button>
+          </>
+        }
+      >
+        {rejecting && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <p style={{ fontSize: '0.88rem', margin: 0 }}>
+              Rejeitar o cadastro de <strong>{rejecting.name}</strong>. Informe o motivo.
+            </p>
+            <Input label="Motivo da rejeição*" value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)} placeholder="Ex: documento inválido" autoFocus />
+          </div>
+        )}
       </Modal>
     </div>
   );

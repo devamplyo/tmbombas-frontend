@@ -77,8 +77,13 @@ export default function StockManagementPage() {
     } catch (e) { toast.error(e.message); }
   };
 
+  // achado F12: SKU e código de barras pareciam opcionais no formulário
+  // (sem asterisco), mas o backend exige os dois — sem essa checagem, o
+  // erro só aparecia depois do servidor recusar, cru e em inglês.
   const saveProduct = async () => {
     if (!productForm.name.trim()) return toast.error('Informe o nome do produto.');
+    if (!productForm.sku.trim()) return toast.error('Informe o SKU.');
+    if (!productForm.barcode.trim()) return toast.error('Informe o código de barras.');
     if (!productForm.manufacturer.trim()) return toast.error('Informe o fabricante.');
     try {
       await db.Product.create({
@@ -171,8 +176,8 @@ export default function StockManagementPage() {
           <CardBody>
             <div className={shared.formGrid}>
               <div style={{ gridColumn: '1/-1' }}><Input label="Nome*" value={productForm.name} onChange={pf('name')} /></div>
-              <Input label="SKU" value={productForm.sku} onChange={pf('sku')} />
-              <Input label="Código de barras" value={productForm.barcode} onChange={pf('barcode')} />
+              <Input label="SKU*" value={productForm.sku} onChange={pf('sku')} />
+              <Input label="Código de barras*" value={productForm.barcode} onChange={pf('barcode')} />
               <Input label="Fabricante*" value={productForm.manufacturer} onChange={pf('manufacturer')} />
               <Select label="Categoria" value={productForm.category} onChange={pf('category')}>
                 {CATEGORY_OPTIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}

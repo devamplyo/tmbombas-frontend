@@ -1,6 +1,6 @@
 import { Package, ShoppingCart, FileText, Users, DollarSign, AlertTriangle, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { db, getExternalOrders } from '@/api/client';
+import { db, getExternalOrders, getReceivables } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import PageHeader from '@/components/ui/PageHeader';
 import Stat from '@/components/ui/Stat';
@@ -14,14 +14,15 @@ import shared from '../shared.module.css';
 
 export default function AdminDashboard() {
   const { data, loading } = useAsyncData(async () => {
-    const [products, sales, serviceOrders, clients, pendingOrders] = await Promise.all([
+    const [products, sales, serviceOrders, clients, pendingOrders, pendingReceivables] = await Promise.all([
       db.Product.list(),
       db.Sale.list('-created_date', 50),
       db.ServiceOrder.list('-created_date', 50),
       db.Client.list(),
       getExternalOrders('enviado'),
+      getReceivables('PENDENTE'),
     ]);
-    return { products, sales, serviceOrders, clients, pendingOrders };
+    return { products, sales, serviceOrders, clients, pendingOrders, receivableTotal: pendingReceivables.total };
   }, [], { refreshInterval: 30000 });
 
   if (loading) {
@@ -32,22 +33,27 @@ export default function AdminDashboard() {
     );
   }
 
-  const { products, sales, serviceOrders, clients, pendingOrders } = data;
+  const { products, sales, serviceOrders, clients, pendingOrders, receivableTotal } = data;
+  // achado F6: aqui contava TODOS os produtos; Estoque (StockPage.jsx) só
+  // conta os ativos em "Total de Produtos" — os dois rótulos precisam
+  // significar a mesma coisa. "Estoque baixo" continua contando todos, em
+  // ambas as telas (StockPage.jsx também não filtra por is_active aqui).
   const lowStock = products.filter((p) => p.stock_quantity <= (p.min_stock || 0));
   const consolidated = sales.filter((s) => s.status === 'consolidada');
   const salesValue = consolidated.reduce((sum, s) => sum + (s.total_amount || 0), 0);
   const pendingOS = serviceOrders.filter((so) => so.status === 'aguardando_validacao');
   const pendingExternal = pendingOrders; // fila real de pedidos aguardando o ADM
-  const receivable = serviceOrders
-    .filter((so) => so.payment_status === 'a_receber' && so.status === 'validada')
-    .reduce((sum, so) => sum + (so.service_value || 0), 0);
+  // achado F17: usava so.payment_status (campo morto — client.js sempre
+  // manda 'a_receber' fixo) em vez do sistema Receivable real, que o
+  // Financeiro já usa. Os dois nunca batiam.
+  const receivable = receivableTotal;
 
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Visão geral do negócio" />
 
       <div className={shared.statsGrid}>
-        <Stat icon={Package} label="Produtos em estoque" value={products.length} tone="primary" />
+        <Stat icon={Package} label="Produtos em estoque" value={products.filter((p) => p.is_active).length} tone="primary" />
         <Stat
           icon={ShoppingCart}
           label="Vendas consolidadas"

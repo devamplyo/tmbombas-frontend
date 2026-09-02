@@ -148,6 +148,20 @@ export default function FCOTarefaDetalhePage() {
         )}
       </div>
 
+      {/* achado F9: tarefa sem OS vinculada nunca mostra "Registrar
+          atendimento" (canRegister exige `order`). Não é bug — o registro
+          é sempre amarrado a uma OS — mas sem essa nota o técnico não
+          entendia por que o card sumia. */}
+      {task.status === 'em_andamento' && !order && (
+        <Card style={{ marginTop: '1.25rem' }}>
+          <CardBody>
+            <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
+              Esta tarefa não está vinculada a uma Ordem de Serviço, então não é possível registrar notas ou fotos do atendimento. Use "Finalizar" para concluir.
+            </p>
+          </CardBody>
+        </Card>
+      )}
+
       {canRegister && (
         <Card style={{ marginTop: '1.25rem' }}>
           <CardHeader title="Registrar atendimento" subtitle="Descreva o que foi feito e/ou anexe fotos (até 6)" />

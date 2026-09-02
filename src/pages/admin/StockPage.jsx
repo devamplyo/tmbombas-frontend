@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Plus, AlertTriangle, Package, DollarSign } from 'lucide-react';
-import { db } from '@/api/client';
+import { Plus, AlertTriangle, Package, DollarSign, Ban, CheckCircle2 } from 'lucide-react';
+import { db, activateProduct } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
@@ -48,8 +48,13 @@ export default function StockPage() {
   const openNew = () => { setForm(EMPTY_PRODUCT); setEditingId(null); setOpen(true); };
   const openEdit = (p) => { setForm({ ...EMPTY_PRODUCT, ...p }); setEditingId(p.id); setOpen(true); };
 
+  // achado F12: SKU e código de barras pareciam opcionais no formulário
+  // (sem asterisco), mas o backend exige os dois — sem essa checagem, o
+  // erro só aparecia depois do servidor recusar, cru e em inglês.
   const save = async () => {
     if (!form.name.trim()) return toast.error('Informe o nome do produto.');
+    if (!form.sku.trim()) return toast.error('Informe o SKU.');
+    if (!form.barcode.trim()) return toast.error('Informe o código de barras.');
     if (!form.manufacturer.trim()) return toast.error('Informe o fabricante.');
     try {
       if (editingId) {
@@ -64,6 +69,25 @@ export default function StockPage() {
   };
 
   const f = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  // achado F5: o dropdown "Status" do formulário nunca era enviado ao
+  // servidor. Desativar/ativar agora é uma ação própria, ligada aos
+  // endpoints que já existem no backend (DELETE ativa desativa; o
+  // reativar é novo dos dois lados).
+  const toggleActive = async (p) => {
+    try {
+      if (p.is_active) {
+        await db.Product.remove(p.id);
+        toast.success('Produto desativado.');
+      } else {
+        await activateProduct(p.id);
+        toast.success('Produto ativado.');
+      }
+      reload();
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível atualizar o produto.');
+    }
+  };
 
   if (loading) return <div className={shared.loading}><Spinner /></div>;
   const { products, sales } = data;
@@ -131,6 +155,9 @@ export default function StockPage() {
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: low ? 'hsl(var(--destructive))' : 'inherit' }}>
                           {low && <AlertTriangle size={14} />}{r.stock_quantity} {r.unit}
                         </span>
+                        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toggleActive(r); }}>
+                          {r.is_active ? <><Ban size={14} /> Desativar</> : <><CheckCircle2 size={14} /> Ativar</>}
+                        </Button>
                       </div>
                     }
                   />
@@ -164,8 +191,8 @@ export default function StockPage() {
         footer={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={save}>Salvar</Button></>}>
         <div className={shared.formGrid}>
           <div style={{ gridColumn: '1/-1' }}><Input label="Nome*" value={form.name} onChange={f('name')} /></div>
-          <Input label="SKU" value={form.sku} onChange={f('sku')} />
-          <Input label="Código de barras" value={form.barcode} onChange={f('barcode')} />
+          <Input label="SKU*" value={form.sku} onChange={f('sku')} />
+          <Input label="Código de barras*" value={form.barcode} onChange={f('barcode')} />
           <Input label="Fabricante*" value={form.manufacturer} onChange={f('manufacturer')} />
           <Select label="Categoria" value={form.category} onChange={f('category')}>
             {CATEGORY_OPTIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
@@ -174,10 +201,6 @@ export default function StockPage() {
           <Input label="Preço de venda (R$)" type="number" step="0.01" value={form.sale_price} onChange={f('sale_price')} />
           <Input label="Qtd. em estoque" type="number" value={form.stock_quantity} onChange={f('stock_quantity')} />
           <Input label="Estoque mínimo" type="number" value={form.min_stock} onChange={f('min_stock')} />
-          <Select label="Status" value={form.is_active ? 'true' : 'false'} onChange={(e) => setForm({ ...form, is_active: e.target.value === 'true' })}>
-            <option value="true">Ativo</option>
-            <option value="false">Inativo</option>
-          </Select>
         </div>
       </Modal>
     </div>

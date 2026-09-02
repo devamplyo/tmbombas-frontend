@@ -52,7 +52,7 @@ export default function FCOClientePerfilPage() {
             <Table
               columns={[
                 { key: 'type', header: 'Tipo', render: (r) => r.type === 'os' ? 'OS' : 'Orçamento' },
-                { key: 'description', header: 'Descrição', render: (r) => r.description.slice(0, 50) },
+                { key: 'description', header: 'Descrição', render: (r) => (r.description ? r.description.slice(0, 50) : '—') },
                 { key: 'service_value', header: 'Valor', align: 'right', render: (r) => brl(r.service_value) },
                 { key: 'status', header: 'Status', render: (r) => <Badge tone={OS_STATUS[r.status]?.tone}>{OS_STATUS[r.status]?.label}</Badge> },
                 { key: 'scheduled_date', header: 'Data', render: (r) => dateBR(r.scheduled_date) },

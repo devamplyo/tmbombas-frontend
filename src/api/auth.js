@@ -1,9 +1,14 @@
 /**
- * Authentication — JWT via the Java backend (:8080).
- * Session stored in localStorage: { token, refresh }.
+ * Authentication — JWT via the Java backend.
+ *
+ * achado (pedido explícito: tirar a credencial do localStorage): a sessão
+ * não fica mais guardada aqui — nem token, nem refresh token. O backend
+ * agora manda cookies httpOnly (`sid`/`rid`) que JavaScript não consegue
+ * ler, e guarda o valor de verdade no Redis, na VPS (ver AuthController /
+ * AccessSessionService no backend). O navegador manda esses cookies
+ * sozinho em toda chamada same-origin — não precisamos mais montar o
+ * header Authorization manualmente em lugar nenhum.
  */
-
-const SESSION_KEY = 'th_session';
 
 const PERFIL_TO_ROLE = {
   ADM_MASTER: 'admin',
@@ -14,7 +19,11 @@ const PERFIL_TO_ROLE = {
 
 function normalizeUser(data) {
   return {
-    id: String(data.id),
+    // achados F13/F16: id vinha como string, enquanto os campos que o
+    // sistema compara com ele depois de decodificados (seller_id,
+    // created_by_id, assigned_to_id) continuam número — a comparação
+    // === nunca batia, e listas "minhas" ficavam sempre vazias.
+    id: data.id,
     full_name: data.nome ?? data.full_name,
     matricula: data.matricula,
     role: PERFIL_TO_ROLE[data.perfil] ?? data.role,
@@ -22,30 +31,10 @@ function normalizeUser(data) {
   };
 }
 
-function readSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveSession(token, refreshToken) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ token, refresh: refreshToken }));
-}
-
-export function getToken() {
-  return readSession()?.token ?? null;
-}
-
-function getRefreshToken() {
-  return readSession()?.refresh ?? null;
-}
-
 export async function login(matricula, password) {
   const res = await fetch('/api/auth/login', {
     method: 'POST',
+    credentials: 'same-origin', // recebe os cookies httpOnly que o login devolve
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ matricula: String(matricula).trim(), senha: String(password) }),
   });
@@ -54,63 +43,49 @@ export async function login(matricula, password) {
     const message = err.error || err.erro || err.message || 'Falha no login.';
     throw new Error(message);
   }
-  const data = await res.json();
-  saveSession(data.token, data.refresh);
+  // O corpo da resposta não carrega mais o token — a sessão já foi
+  // guardada pelo backend via cookie. Busca o perfil normalmente.
   return me();
 }
 
 /**
- * Exchanges the token for a new one using the refresh token, without needing to log in again.
- * Called during active use (see useSessionTimeout) — never by an automatic
- * screen refresh, otherwise the session would never really expire from inactivity.
+ * Troca o cookie de sessão por um novo, usando o refresh token (também em
+ * cookie httpOnly) — sem precisar logar de novo. Chamado durante uso ativo
+ * (ver useSessionTimeout), nunca por um refresh automático de tela, senão
+ * a sessão nunca expiraria de verdade por inatividade.
  */
 export async function refresh() {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) throw new Error('Sem sessão para renovar.');
-
-  const res = await fetch('/api/auth/refresh', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
+  const res = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' });
   if (!res.ok) {
     throw new Error('Não foi possível renovar a sessão.');
   }
-  const data = await res.json();
-  saveSession(data.token, data.refresh);
-  return data.token;
 }
 
 export async function me() {
-  const token = getToken();
-  if (!token) {
-    return null;
-  }
-
-  const res = await fetch('/api/auth/me', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  // Sem cookie de sessão válido, o backend responde 401 — não tem como
+  // saber isso de antemão no front (o cookie é httpOnly, JS não lê).
+  const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
   if (!res.ok) {
-    logout();
     return null;
   }
   const data = await res.json();
-  const user = normalizeUser(data);
-  return user;
+  return normalizeUser(data);
 }
 
 export function logout() {
-  const token = getToken();
-  const refreshToken = getRefreshToken();
-  localStorage.removeItem(SESSION_KEY);
+  // Best-effort: limpa os cookies no servidor (e invalida o refresh token).
+  // Não bloqueia o logout local mesmo se a chamada falhar (rede offline,
+  // servidor fora do ar etc.) — quem chama já assume que a sessão acabou.
+  fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+}
 
-  // Best-effort: invalidates the refresh token on the server. Doesn't block the
-  // local logout even if the call fails (offline network, server down, etc.).
-  if (token) {
-    fetch('/api/auth/logout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ refresh_token: refreshToken || undefined }),
-    }).catch(() => {});
-  }
+/**
+ * Sempre null agora — não existe mais token legível por JavaScript em
+ * lugar nenhum. Mantido só porque client.js e NfseSection.jsx ainda
+ * importam; os dois já tratam token ausente sem quebrar (a autenticação
+ * de verdade acontece pelo cookie httpOnly, enviado sozinho pelo navegador
+ * em toda chamada same-origin).
+ */
+export function getToken() {
+  return null;
 }

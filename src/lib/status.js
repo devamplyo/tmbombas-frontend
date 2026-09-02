@@ -13,6 +13,8 @@ export const OS_STATUS = {
   em_execucao: { label: 'Em execução', tone: 'primary' },
   concluida: { label: 'Concluída', tone: 'success' },
   cancelada: { label: 'Cancelada', tone: 'muted' },
+  // achado F8: mapeado por precaução (ver client.js ENUM_TO_OS_STATUS).
+  reprovada: { label: 'Reprovada', tone: 'danger' },
 };
 
 export const SALE_STATUS = {

@@ -18,6 +18,9 @@ import { getToken, logout } from './auth.js';
 const BASE = '/api';
 
 async function req(method, url, body) {
+  // achado (tirar a credencial do localStorage): getToken() é sempre null
+  // agora — a sessão vem do cookie httpOnly `sid`, que o navegador manda
+  // sozinho (credentials: 'same-origin'). Ver auth.js.
   const token = getToken();
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -26,6 +29,7 @@ async function req(method, url, body) {
 
   const res = await fetch(BASE + url, {
     method,
+    credentials: 'same-origin',
     headers,
     body: body != null ? JSON.stringify(body) : undefined,
   });
@@ -74,6 +78,29 @@ const CLIENT_TYPE_TO_ENUM = {
 };
 const ENUM_TO_CLIENT_TYPE = { PESSOA_FISICA: 'pessoa_fisica', PESSOA_JURIDICA: 'pessoa_juridica' };
 
+// achado (descoberto ao corrigir F14): ClientResponse não expunha `status`
+// (só `active`) — PENDENTE e REPROVADO eram os dois active=false,
+// indistinguíveis na tela. Ver validation_status no decode do Client abaixo.
+const ENUM_TO_CLIENT_STATUS = {
+  PENDENTE: 'aguardando_validacao',
+  APROVADO: 'ativo',
+  REPROVADO: 'rejeitado',
+};
+
+// achado F10: backend só tinha um "CARTAO" genérico; a tela sempre ofereceu
+// crédito/débito separados. Alinhado dividindo o enum do lado do backend.
+const PAYMENT_METHOD_TO_ENUM = {
+  dinheiro: 'DINHEIRO',
+  pix: 'PIX',
+  cartao_credito: 'CARTAO_CREDITO',
+  cartao_debito: 'CARTAO_DEBITO',
+  boleto: 'BOLETO',
+  transferencia: 'TRANSFERENCIA',
+};
+const ENUM_TO_PAYMENT_METHOD = Object.fromEntries(
+  Object.entries(PAYMENT_METHOD_TO_ENUM).map(([k, v]) => [v, k]),
+);
+
 // Front's service-order status vocabulary → backend enum (best effort)
 const OS_STATUS_TO_ENUM = {
   aguardando_validacao: 'ABERTA',
@@ -91,6 +118,10 @@ const ENUM_TO_OS_STATUS = {
   EM_ANDAMENTO: 'em_execucao',
   CONCLUIDA: 'concluida',
   CANCELADA: 'cancelada',
+  // achado F8: REPROVADA existe no backend (fluxo de aprovação órfão, ver
+  // F7) e não tinha mapeamento explícito — mapear por precaução, caso esse
+  // fluxo seja religado um dia.
+  REPROVADA: 'reprovada',
 };
 
 const TASK_STATUS_TO_ENUM = {
@@ -184,8 +215,11 @@ const CONFIG = {
       address: r.address,
       city_name: r.address?.city,
       state: r.address?.state,
-      // backend only has `active`; we synthesize the status the screens expect
-      validation_status: r.active === false ? 'aguardando_validacao' : 'ativo',
+      // achado (descoberto ao corrigir F14): antes só existia `active` no
+      // backend, então PENDENTE e REPROVADO (os dois active=false) ficavam
+      // indistinguíveis — Rejeitar "funcionava" mas a tela nunca conseguia
+      // mostrar. `status` agora vem exposto de verdade (ClientResponse).
+      validation_status: ENUM_TO_CLIENT_STATUS[r.status] || (r.active === false ? 'aguardando_validacao' : 'ativo'),
       is_active: r.active,
       created_date: r.created_at,
       created_at: r.created_at,
@@ -233,7 +267,8 @@ const CONFIG = {
   Sale: {
     route: '/sales',
     hasGetById: true,
-    hasUpdate: false, // backend doesn't update a sale (cancel = DELETE)
+    // cancel = POST /sales/{id}/cancel (achado F1 — ver cancelSale() abaixo), não update genérico
+    hasUpdate: false,
     decode: (r) => ({
       id: r.id,
       client_name: r.customer_name,
@@ -244,6 +279,8 @@ const CONFIG = {
       total_items: (r.items || []).reduce((n, i) => n + (i.quantity || 0), 0),
       // backend only has ATIVA/CANCELADA — an active sale is already a completed sale
       status: r.status === 'CANCELADA' ? 'cancelada' : 'consolidada',
+      // achado F3: agora vem gravado de verdade — ver payment_method no encode()
+      payment_method: ENUM_TO_PAYMENT_METHOD[r.payment_method] || null,
       sale_date: r.created_at,
       created_date: r.created_at,
       created_at: r.created_at,
@@ -258,6 +295,7 @@ const CONFIG = {
     encode: (d) =>
       clean({
         customer_name: d.client_name ?? d.customer_name ?? '',
+        payment_method: PAYMENT_METHOD_TO_ENUM[d.payment_method] || undefined,
         items: (d.items || []).map((i) => ({
           product_id: numOrNull(i.product_id),
           quantity: i.quantity,
@@ -610,6 +648,7 @@ export async function addServiceRecord(orderId, { note, photos } = {}) {
 
   const res = await fetch(`${BASE}/technician/service-orders/${orderId}/records`, {
     method: 'POST',
+    credentials: 'same-origin',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
   });
@@ -821,4 +860,46 @@ export async function confirmReceivable(id, { paymentMethod, receivedDate } = {}
     payment_method: paymentMethod || undefined,
     received_date: receivedDate || undefined,
   }));
+}
+
+/* ─────────────────────────  Ativar/desativar produto  ───────────────────────── */
+
+// achado F5: desativar já existia no backend (DELETE, via db.Product.remove);
+// não existia como reverter. Ativar é novo dos dois lados.
+export async function activateProduct(id) {
+  return req('POST', `/products/${id}/activate`);
+}
+
+/* ─────────────────────────  Aprovação de cliente pendente  ───────────────────────── */
+
+/**
+ * achado F14: `ClientsPage.jsx` chamava `db.Client.update(id, { validation_status })`,
+ * que passa pelo `Client.encode()` genérico — como só esse campo era passado,
+ * `name`/`type`/`document` saíam vazios/undefined e o PUT falhava com 400,
+ * silenciosamente (sem try/catch). O backend já tinha os endpoints certos,
+ * prontos, nunca chamados pelo frontend.
+ */
+export async function approveClient(id) {
+  return req('POST', `/clients/${id}/approve`);
+}
+
+export async function rejectClient(id, reason) {
+  return req('POST', `/clients/${id}/reject`, { reason });
+}
+
+/* ─────────────────────────  Cancelamento de venda  ───────────────────────── */
+
+/**
+ * Cancela uma venda consolidada — soft delete (status vira CANCELADA, com
+ * trilha de auditoria), estoque devolvido e lançamento financeiro revertido.
+ * O backend valida a senha do ADM aqui dentro (achado F1: a tela chamava
+ * `/api/auth/verify-admin`, que nunca existiu, seguido de um DELETE que
+ * exigia papel ADM_MASTER — mas quem cancela é o Vendedor Interno).
+ */
+export async function cancelSale(saleId, { adminMatricula, adminPassword, reason }) {
+  return req('POST', `/sales/${saleId}/cancel`, {
+    admin_matricula: adminMatricula,
+    admin_password: adminPassword,
+    reason,
+  });
 }

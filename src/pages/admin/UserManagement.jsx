@@ -47,15 +47,10 @@ export default function UserManagement() {
     setOpen(true);
   };
 
-  const toggleRole = (role) => {
-    setForm((f) => {
-      if (f.roles.includes(role)) {
-        if (f.roles.length === 1) return f; // minimum of 1 profile
-        return { ...f, roles: f.roles.filter((r) => r !== role) };
-      }
-      return { ...f, roles: [...f.roles, role] };
-    });
-  };
+  // achado F2: a tela deixava marcar 2+ perfis, mas User.perfil (backend) é
+  // um único enum — só o primeiro marcado sobrevivia ao salvar, sem aviso.
+  // Seleção única agora, pra não prometer o que o sistema não guarda.
+  const selectRole = (role) => setForm((f) => ({ ...f, roles: [role] }));
 
   const save = async () => {
     if (!form.full_name.trim()) return toast.error('Informe o nome.');
@@ -82,9 +77,21 @@ export default function UserManagement() {
   };
 
   const toggleActive = async (u) => {
-    await db.User.update(u.id, { is_active: !u.is_active });
-    toast.success(u.is_active ? 'Usuário desativado.' : 'Usuário ativado.');
-    reload();
+    try {
+      // encode() reconstrói o payload inteiro a partir dos campos presentes
+      // aqui — mandar só is_active zera nome/matrícula/perfil no backend
+      // (@NotBlank) e o PUT falha com 400 sem persistir nada (achado F18).
+      await db.User.update(u.id, {
+        full_name: u.full_name,
+        matricula: u.matricula,
+        role: u.role,
+        is_active: !u.is_active,
+      });
+      toast.success(u.is_active ? 'Usuário desativado.' : 'Usuário ativado.');
+      reload();
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível atualizar o usuário.');
+    }
   };
 
   const getRoleLabels = (u) => {
@@ -123,9 +130,11 @@ export default function UserManagement() {
                 render: (r) => (
                   <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                     <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Editar</Button>
-                    <Button size="sm" variant={r.is_active ? 'ghost' : 'outline'} onClick={() => toggleActive(r)}>
-                      {r.is_active ? 'Desativar' : 'Ativar'}
-                    </Button>
+                    {!isAdminUser(r) && (
+                      <Button size="sm" variant={r.is_active ? 'ghost' : 'outline'} onClick={() => toggleActive(r)}>
+                        {r.is_active ? 'Desativar' : 'Ativar'}
+                      </Button>
+                    )}
                   </div>
                 ),
               },
@@ -157,13 +166,13 @@ export default function UserManagement() {
               </>
             ) : (
               <>
-                <p className={styles.rolesLabel}>Perfis de acesso* <span className={styles.rolesHint}>(pode selecionar mais de 1)</span></p>
+                <p className={styles.rolesLabel}>Perfil de acesso*</p>
                 <div className={styles.rolesGrid}>
                   {ASSIGNABLE_ROLES.map((role) => {
                     const checked = form.roles.includes(role);
                     return (
                       <label key={role} className={[styles.roleCard, checked ? styles.roleChecked : ''].join(' ')}>
-                        <input type="checkbox" checked={checked} onChange={() => toggleRole(role)} />
+                        <input type="radio" name="role" checked={checked} onChange={() => selectRole(role)} />
                         <span>{ROLE_LABELS[role]}</span>
                       </label>
                     );

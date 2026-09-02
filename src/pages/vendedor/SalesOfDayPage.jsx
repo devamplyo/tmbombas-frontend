@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Ban } from 'lucide-react';
-import { db } from '@/api/client';
-import { getToken } from '@/api/auth';
+import { db, cancelSale as cancelSaleApi } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
@@ -27,32 +26,29 @@ export default function SalesOfDayPage() {
   }, []);
 
   const [cancelSale, setCancelSale] = useState(null); // sale selected for cancellation
+  const [adminMatricula, setAdminMatricula] = useState('');
   const [adminPass, setAdminPass] = useState('');
+  const [reason, setReason] = useState('');
   const [working, setWorking] = useState(false);
 
-  const openCancel = (sale) => { setCancelSale(sale); setAdminPass(''); };
-  const closeCancel = () => { setCancelSale(null); setAdminPass(''); };
+  const openCancel = (sale) => { setCancelSale(sale); setAdminMatricula(''); setAdminPass(''); setReason(''); };
+  const closeCancel = () => { setCancelSale(null); setAdminMatricula(''); setAdminPass(''); setReason(''); };
 
+  // achado F1: a tela chamava um endpoint de verificação de senha que nunca
+  // existiu (/api/auth/verify-admin), seguido de um DELETE que só ADM_MASTER
+  // pode chamar — mas quem cancela aqui é o Vendedor Interno. O backend já
+  // tem o endpoint certo pra isso, com a senha do ADM validada no próprio
+  // servidor e soft-delete com trilha de auditoria.
   const confirmCancel = async () => {
     if (!cancelSale) return;
     setWorking(true);
     try {
-      const res = await fetch('/api/auth/verify-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ password: adminPass }),
-      });
-      if (!res.ok) throw new Error('Não foi possível validar a senha. Reinicie o servidor (backend) e tente novamente.');
-      const { valid } = await res.json();
-      if (!valid) { toast.error('Senha do ADM incorreta.'); return; }
-
-      // The backend restores stock and reverses the financial entry when the sale is deleted.
-      await db.Sale.remove(cancelSale.id);
+      await cancelSaleApi(cancelSale.id, { adminMatricula, adminPassword: adminPass, reason });
       toast.success('Venda cancelada e estoque restaurado.');
       closeCancel();
       reload();
     } catch (e) {
-      toast.error(e.message);
+      toast.error(e.message || 'Não foi possível cancelar a venda.');
     } finally {
       setWorking(false);
     }
@@ -96,7 +92,7 @@ export default function SalesOfDayPage() {
         footer={
           <>
             <Button variant="ghost" onClick={closeCancel} disabled={working}>Fechar</Button>
-            <Button variant="danger" onClick={confirmCancel} disabled={!adminPass || working}>
+            <Button variant="danger" onClick={confirmCancel} disabled={!adminMatricula || !adminPass || !reason.trim() || working}>
               {working ? 'Cancelando...' : 'Confirmar cancelamento'}
             </Button>
           </>
@@ -114,10 +110,14 @@ export default function SalesOfDayPage() {
               </div>
             </div>
             <p style={{ fontSize: '0.85rem', color: 'hsl(220 18% 78%)', margin: 0 }}>
-              O estoque dos itens será restaurado. Informe a senha do ADM para confirmar.
+              O estoque dos itens será restaurado. Informe a matrícula e a senha do ADM, e o motivo do cancelamento.
             </p>
+            <Input label="Matrícula do ADM*" value={adminMatricula}
+              onChange={(e) => setAdminMatricula(e.target.value)} placeholder="Matrícula do ADM Master" autoFocus />
             <Input label="Senha do ADM*" type="password" value={adminPass}
-              onChange={(e) => setAdminPass(e.target.value)} placeholder="Senha do ADM Master" autoFocus />
+              onChange={(e) => setAdminPass(e.target.value)} placeholder="Senha do ADM Master" />
+            <Input label="Motivo do cancelamento*" value={reason}
+              onChange={(e) => setReason(e.target.value)} placeholder="Ex: produto trocado por engano" />
           </div>
         )}
       </Modal>

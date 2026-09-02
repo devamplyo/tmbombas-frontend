@@ -40,12 +40,24 @@ export default function VEXNovoPedidoPage() {
     return matchText && matchCat && p.stock_quantity > 0;
   });
 
+  // achado F4: nem a tela nem a criação do pedido no backend travavam por
+  // estoque — só descobria na hora da aprovação do ADM, quando já tinha
+  // derrubado a aprovação inteira. Agora avisa (sem travar) assim que o
+  // pedido passar do que existe agora no estoque.
+  const warnIfOverStock = (product, qty) => {
+    if (product && qty > product.stock_quantity) {
+      toast.error(`Estoque atual de "${product.name}": ${product.stock_quantity}. O ADM pode não conseguir aprovar esse pedido.`);
+    }
+  };
+
   const addItem = (product) => {
     setCart((c) => {
       const idx = c.findIndex((i) => i.product_id === product.id);
       if (idx !== -1) {
+        const nextQty = c[idx].quantity + 1;
+        warnIfOverStock(product, nextQty);
         const u = [...c];
-        u[idx] = { ...u[idx], quantity: u[idx].quantity + 1, total: (u[idx].quantity + 1) * u[idx].unit_price };
+        u[idx] = { ...u[idx], quantity: nextQty, total: nextQty * u[idx].unit_price };
         return u;
       }
       return [...c, { product_id: product.id, product_name: product.name, unit_price: product.sale_price, quantity: 1, total: product.sale_price }];
@@ -57,6 +69,7 @@ export default function VEXNovoPedidoPage() {
       if (i.product_id !== pid) return i;
       const qty = i.quantity + delta;
       if (qty <= 0) return null;
+      if (delta > 0) warnIfOverStock((data?.products || []).find((p) => p.id === pid), qty);
       return { ...i, quantity: qty, total: qty * i.unit_price };
     }).filter(Boolean));
   };

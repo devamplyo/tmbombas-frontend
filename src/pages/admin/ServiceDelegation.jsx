@@ -72,7 +72,7 @@ export default function ServiceDelegation() {
               </Select>
               <Select label="OS vinculada (opcional)" value={form.service_order_id} onChange={f('service_order_id')}>
                 <option value="">Nenhuma</option>
-                {orders.map((o) => <option key={o.id} value={o.id}>{o.client_name} — {o.description.slice(0, 40)}</option>)}
+                {orders.map((o) => <option key={o.id} value={o.id}>{o.client_name} — {(o.description || '').slice(0, 40)}</option>)}
               </Select>
               <Input label="Descrição*" value={form.description} onChange={f('description')} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.9rem' }}>
