@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Plus, Trash2, FileDown } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
-import jsPDF from 'jspdf';
 import { db } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
@@ -14,7 +13,7 @@ import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import { Input, Select, Textarea } from '@/components/ui/Field';
 import { brl, dateBR } from '@/lib/format';
-import { ensureSpace } from '@/lib/pdf';
+import { generateServiceOrderPdf } from '@/lib/orderPdf';
 import { OS_STATUS } from '@/lib/status';
 import shared from '../shared.module.css';
 
@@ -26,44 +25,6 @@ const TABS = [
   { value: 'orcamento', label: 'Orçamento' },
   { value: 'os', label: 'Ordens de Serviço' },
 ];
-
-function generateOrcamentoPdf(order) {
-  const doc = new jsPDF();
-  doc.setFontSize(16);
-  doc.text('Orçamento de Serviço', 14, 18);
-  doc.setFontSize(10);
-  doc.text(`Nº ${order.order_number || order.id}`, 14, 26);
-  doc.text(`Cliente: ${order.client_name || '-'}`, 14, 33);
-  doc.text(`Data: ${dateBR(order.created_date)}`, 14, 39);
-  if (order.scheduled_date) doc.text(`Previsão: ${dateBR(order.scheduled_date)}`, 14, 45);
-
-  let y = 56;
-  doc.setFontSize(11);
-  doc.text('Itens', 14, y);
-  y += 7;
-  doc.setFontSize(9);
-  (order.items || []).forEach((it) => {
-    y = ensureSpace(doc, y);
-    doc.text(it.name || '-', 14, y);
-    doc.text(brl(it.value), 196, y, { align: 'right' });
-    y += 5;
-    if (it.description) {
-      const lines = doc.splitTextToSize(it.description, 160);
-      y = ensureSpace(doc, y, lines.length * 4);
-      doc.setFontSize(8);
-      doc.text(lines, 18, y);
-      y += lines.length * 4;
-      doc.setFontSize(9);
-    }
-    y += 2;
-  });
-
-  y = ensureSpace(doc, y, 12) + 6;
-  doc.setFontSize(12);
-  doc.text(`Total: ${brl(order.service_value)}`, 14, y);
-
-  doc.save(`orcamento-${order.order_number || order.id}.pdf`);
-}
 
 export default function FCOOrcamentosPage() {
   const { user } = useOutletContext();
@@ -178,11 +139,11 @@ export default function FCOOrcamentosPage() {
               { key: 'service_value', header: 'Valor', align: 'right', render: (r) => brl(r.service_value) },
               { key: 'status', header: 'Status', render: (r) => <Badge tone={OS_STATUS[r.status]?.tone}>{OS_STATUS[r.status]?.label}</Badge> },
               { key: 'scheduled_date', header: 'Data', render: (r) => dateBR(r.scheduled_date) },
-              ...(tab === 'orcamento' ? [{
+              {
                 key: 'pdf', header: '', render: (r) => (
-                  <Button size="sm" variant="ghost" onClick={() => generateOrcamentoPdf(r)}><FileDown size={14} /> Gerar PDF</Button>
+                  <Button size="sm" variant="ghost" onClick={() => generateServiceOrderPdf(r)}><FileDown size={14} /> Gerar PDF</Button>
                 ),
-              }] : []),
+              },
             ]}
             rows={tabbed}
             empty={tab === 'orcamento' ? 'Nenhum orçamento.' : 'Nenhuma ordem de serviço.'}
