@@ -659,6 +659,16 @@ export async function addServiceRecord(orderId, { note, photos } = {}) {
   return res.json();
 }
 
+/** Starts a validated service order (technician), moving it to "em execução". */
+export async function startServiceOrder(orderId) {
+  return req('POST', `/technician/service-orders/${orderId}/start`);
+}
+
+/** Finishes an in-progress service order (technician), moving it to "concluída". */
+export async function finishServiceOrder(orderId) {
+  return req('POST', `/technician/service-orders/${orderId}/finish`);
+}
+
 /** Lists the records (text/photos) already made on a service order. */
 export async function listServiceRecords(orderId) {
   try {
