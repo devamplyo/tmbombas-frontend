@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
 import Card, { CardHeader, CardBody } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import ConfirmSubmit from '@/components/ui/ConfirmSubmit';
 import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
 import { Textarea } from '@/components/ui/Field';
@@ -26,6 +27,7 @@ export default function FCOTarefaDetalhePage() {
   const [note, setNote] = useState('');
   const [photos, setPhotos] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
 
   const { data, loading, reload } = useAsyncData(async () => {
     const tasks = await db.ServiceTask.filter({ id });
@@ -68,11 +70,16 @@ export default function FCOTarefaDetalhePage() {
 
   const removePhoto = (idx) => setPhotos((prev) => prev.filter((_, i) => i !== idx));
 
-  const submitRecord = async () => {
+  // the button only checks and opens the "confira antes de salvar" screen — nothing is saved yet
+  const askConfirm = () => {
     if (!note.trim() && photos.length === 0) {
       toast.error('Escreva um texto ou anexe pelo menos uma foto.');
       return;
     }
+    setConfirmando(true);
+  };
+
+  const submitRecord = async () => {
     setSaving(true);
     try {
       await addServiceRecord(data.order.id, { note: note.trim() || undefined, photos });
@@ -84,6 +91,7 @@ export default function FCOTarefaDetalhePage() {
       toast.error(e.message);
     } finally {
       setSaving(false);
+      setConfirmando(false);
     }
   };
 
@@ -218,7 +226,7 @@ export default function FCOTarefaDetalhePage() {
               </span>
             </div>
 
-            <Button style={{ marginTop: '1rem' }} onClick={submitRecord} disabled={saving}>
+            <Button style={{ marginTop: '1rem' }} onClick={askConfirm} disabled={saving}>
               {saving ? 'Salvando...' : 'Salvar registro'}
             </Button>
           </CardBody>
@@ -255,6 +263,18 @@ export default function FCOTarefaDetalhePage() {
           </CardBody>
         </Card>
       )}
+
+      <ConfirmSubmit
+        open={confirmando}
+        title="Confira o registro antes de salvar"
+        client={task.client_name}
+        note={{ label: 'O que foi feito', text: note.trim() }}
+        photos={photos}
+        saving={saving}
+        confirmLabel="Confirmar e salvar"
+        onCancel={() => setConfirmando(false)}
+        onConfirm={submitRecord}
+      />
     </div>
   );
 }

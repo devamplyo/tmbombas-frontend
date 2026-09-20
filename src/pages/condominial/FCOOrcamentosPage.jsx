@@ -9,6 +9,7 @@ import Card, { CardBody } from '@/components/ui/Card';
 import Table from '@/components/ui/Table';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import ConfirmSubmit from '@/components/ui/ConfirmSubmit';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import { Input, Select, Textarea } from '@/components/ui/Field';
@@ -39,6 +40,8 @@ export default function FCOOrcamentosPage() {
   const [tab, setTab] = useState('orcamento');
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_ORCAMENTO);
+  const [confirmando, setConfirmando] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const blankFor = (type) =>
     type === 'orcamento' ? { ...EMPTY_ORCAMENTO, items: [{ ...EMPTY_ITEM }] } : { ...EMPTY_OS };
@@ -61,14 +64,23 @@ export default function FCOOrcamentosPage() {
   const addItem = () => setForm({ ...form, items: [...form.items, { ...EMPTY_ITEM }] });
   const removeItem = (idx) => setForm({ ...form, items: form.items.filter((_, i) => i !== idx) });
 
-  const save = async () => {
+  // the button only checks and opens the "confira antes de enviar" screen — nothing is sent yet
+  const askConfirm = () => {
     if (!form.client_id) return toast.error('Selecione o cliente.');
-    const client = data.clients.find((c) => c.id === form.client_id);
-
     if (form.type === 'orcamento') {
-      const items = form.items.filter((it) => it.name.trim());
-      if (items.length === 0) return toast.error('Adicione pelo menos um item com nome.');
-      try {
+      if (!form.items.some((it) => it.name.trim())) return toast.error('Adicione pelo menos um item com nome.');
+    } else if (!form.description.trim()) {
+      return toast.error('Informe a descrição.');
+    }
+    setConfirmando(true);
+  };
+
+  const save = async () => {
+    const client = data.clients.find((c) => c.id === form.client_id);
+    setSaving(true);
+    try {
+      if (form.type === 'orcamento') {
+        const items = form.items.filter((it) => it.name.trim());
         await db.ServiceOrder.create({
           type: 'orcamento',
           client_id: form.client_id,
@@ -82,28 +94,24 @@ export default function FCOOrcamentosPage() {
           payment_status: 'a_receber',
         });
         toast.success('Orçamento criado e enviado para validação.');
-        setOpen(false); reload();
-      } catch (e) { toast.error(e.message); }
-      return;
-    }
-
-    if (!form.description.trim()) return toast.error('Informe a descrição.');
-    try {
-      await db.ServiceOrder.create({
-        type: 'os',
-        client_id: form.client_id,
-        client_name: client?.name || '',
-        description: form.description,
-        scheduled_date: form.scheduled_date || null,
-        service_value: Number(form.service_value) || 0,
-        assigned_to_id: user.id,
-        assigned_to_name: user.full_name,
-        status: 'aguardando_validacao',
-        payment_status: 'a_receber',
-      });
-      toast.success('Criado e enviado para validação.');
+      } else {
+        await db.ServiceOrder.create({
+          type: 'os',
+          client_id: form.client_id,
+          client_name: client?.name || '',
+          description: form.description,
+          scheduled_date: form.scheduled_date || null,
+          service_value: Number(form.service_value) || 0,
+          assigned_to_id: user.id,
+          assigned_to_name: user.full_name,
+          status: 'aguardando_validacao',
+          payment_status: 'a_receber',
+        });
+        toast.success('Criado e enviado para validação.');
+      }
       setOpen(false); reload();
     } catch (e) { toast.error(e.message); }
+    finally { setSaving(false); setConfirmando(false); }
   };
 
   const f = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -152,7 +160,7 @@ export default function FCOOrcamentosPage() {
       </Card>
 
       <Modal open={open} onClose={() => setOpen(false)} title={form.type === 'orcamento' ? 'Novo Orçamento' : 'Nova Ordem de Serviço'} width={620}
-        footer={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={save}>Enviar para validação</Button></>}>
+        footer={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={askConfirm}>Enviar para validação</Button></>}>
         <div className={shared.formGrid}>
           <Select label="Tipo" value={form.type} onChange={(e) => changeType(e.target.value)}>
             <option value="orcamento">Orçamento</option>
@@ -194,6 +202,25 @@ export default function FCOOrcamentosPage() {
           </div>
         )}
       </Modal>
+
+      <ConfirmSubmit
+        open={confirmando}
+        title={form.type === 'orcamento' ? 'Confira o orçamento antes de enviar' : 'Confira a OS antes de enviar'}
+        client={clients.find((c) => String(c.id) === String(form.client_id))?.name}
+        rows={[
+          { label: 'Tipo', value: form.type === 'orcamento' ? 'Orçamento' : 'Ordem de Serviço' },
+          { label: 'Data prevista', value: dateBR(form.scheduled_date) },
+          ...(form.type === 'os' ? [{ label: 'Valor estimado', value: form.service_value ? brl(Number(form.service_value)) : '' }] : []),
+        ]}
+        items={form.type === 'orcamento'
+          ? form.items.filter((it) => it.name.trim()).map((it) => ({ title: it.name, subtitle: it.description, amount: Number(it.value) || 0 }))
+          : []}
+        total={form.type === 'orcamento' ? itemTotal(form.items.filter((it) => it.name.trim())) : undefined}
+        note={form.type === 'os' ? { label: 'Descrição', text: form.description } : undefined}
+        saving={saving}
+        onCancel={() => setConfirmando(false)}
+        onConfirm={save}
+      />
     </div>
   );
 }

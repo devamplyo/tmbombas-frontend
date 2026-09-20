@@ -9,6 +9,7 @@ import Card, { CardBody } from '@/components/ui/Card';
 import Table from '@/components/ui/Table';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import ConfirmSubmit from '@/components/ui/ConfirmSubmit';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import { Input, Select, Textarea } from '@/components/ui/Field';
@@ -34,10 +35,18 @@ export default function VEXOrcamentosPage() {
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
+  const [confirmando, setConfirmando] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const save = async () => {
+  // the button only checks and opens the "confira antes de enviar" screen — nothing is sent yet
+  const askConfirm = () => {
     if (!form.client_id) return toast.error('Selecione o cliente.');
     if (!form.description.trim()) return toast.error('Informe a descrição.');
+    setConfirmando(true);
+  };
+
+  const save = async () => {
+    setSaving(true);
     try {
       const client = data.clients.find((c) => c.id === form.client_id);
       await db.ServiceOrder.create({
@@ -56,6 +65,7 @@ export default function VEXOrcamentosPage() {
       setForm(EMPTY);
       reload();
     } catch (e) { toast.error(e.message); }
+    finally { setSaving(false); setConfirmando(false); }
   };
 
   const f = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -84,7 +94,7 @@ export default function VEXOrcamentosPage() {
       </Card>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Novo orçamento"
-        footer={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={save}>Enviar para validação</Button></>}>
+        footer={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={askConfirm}>Enviar para validação</Button></>}>
         <div className={shared.formGrid}>
           <Select label="Cliente*" value={form.client_id} onChange={f('client_id')}>
             <option value="">Selecione...</option>
@@ -96,6 +106,16 @@ export default function VEXOrcamentosPage() {
           </div>
         </div>
       </Modal>
+
+      <ConfirmSubmit
+        open={confirmando}
+        client={clients.find((c) => String(c.id) === String(form.client_id))?.name}
+        rows={[{ label: 'Valor estimado', value: form.service_value ? brl(Number(form.service_value)) : '' }]}
+        note={{ label: 'Descrição do serviço', text: form.description }}
+        saving={saving}
+        onCancel={() => setConfirmando(false)}
+        onConfirm={save}
+      />
     </div>
   );
 }

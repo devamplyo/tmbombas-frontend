@@ -1,0 +1,167 @@
+/* Above the Modal (z-index 100): the confirmation opens on top of forms that live inside one */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 200;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+
+.header {
+  padding: 1.1rem 1.25rem 0.9rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.hint {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* the list scrolls inside the dialog, so the buttons never leave the screen */
+.body {
+  padding: 1.1rem 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  font-size: 1rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: hsl(var(--muted-foreground));
+}
+
+.client {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid hsl(var(--primary) / 0.5);
+  background: hsl(var(--primary) / 0.1);
+  border-radius: var(--radius);
+}
+.client strong {
+  font-size: 1.2rem;
+  overflow-wrap: anywhere;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+.value {
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid hsl(var(--border));
+}
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.itemText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.itemTitle {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.itemSub {
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+  overflow-wrap: anywhere;
+}
+.amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1.1rem;
+}
+.total strong {
+  font-size: 1.5rem;
+  color: hsl(var(--primary));
+}
+
+.note p {
+  margin-top: 0.3rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.photos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid hsl(var(--border));
+}
+.actions button {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+}
+
+/* phone: confirm on top, bigger and separated, so the wrong button isn't tapped by accident */
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column-reverse;
+    gap: 0.9rem;
+  }
+}

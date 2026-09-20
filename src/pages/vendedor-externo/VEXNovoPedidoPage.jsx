@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
 import Card, { CardBody } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import ConfirmSubmit from '@/components/ui/ConfirmSubmit';
 import Spinner from '@/components/ui/Spinner';
 import { Select } from '@/components/ui/Field';
 import { brl } from '@/lib/format';
@@ -31,6 +32,8 @@ export default function VEXNovoPedidoPage() {
   const [payment, setPayment] = useState('pix');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [confirmando, setConfirmando] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const categories = [...new Set((data?.products || []).map((p) => p.category).filter(Boolean))].sort();
 
@@ -76,8 +79,14 @@ export default function VEXNovoPedidoPage() {
 
   const totalAmount = cart.reduce((s, i) => s + i.total, 0);
 
-  const submit = async () => {
+  // the button only checks and opens the "confira antes de enviar" screen — nothing is sent yet
+  const askConfirm = () => {
     if (!cart.length) return toast.error('Adicione itens ao pedido.');
+    setConfirmando(true);
+  };
+
+  const submit = async () => {
+    setSaving(true);
     try {
       // Sends it for the ADM to approve — stock is only deducted once they approve it.
       await createExternalOrder({
@@ -88,6 +97,7 @@ export default function VEXNovoPedidoPage() {
       toast.success('Pedido enviado para o ADM aprovar.');
       navigate(`/vendedor-externo/clientes/${clientId}`);
     } catch (e) { toast.error(e.message); }
+    finally { setSaving(false); setConfirmando(false); }
   };
 
   if (loading) return <div className={shared.loading}><Spinner /></div>;
@@ -149,7 +159,7 @@ export default function VEXNovoPedidoPage() {
                   <option value="cartao_debito">Cartão de Débito</option>
                   <option value="dinheiro">Dinheiro</option>
                 </Select>
-                <Button style={{ width: '100%', marginTop: '0.75rem' }} onClick={submit}>
+                <Button style={{ width: '100%', marginTop: '0.75rem' }} onClick={askConfirm}>
                   <Send size={16} /> Enviar pedido
                 </Button>
               </div>
@@ -157,6 +167,17 @@ export default function VEXNovoPedidoPage() {
           </CardBody>
         </Card>
       </div>
+
+      <ConfirmSubmit
+        open={confirmando}
+        client={client?.name}
+        items={cart.map((i) => ({ title: `${i.quantity}× ${i.product_name}`, amount: i.total }))}
+        total={totalAmount}
+        rows={[{ label: 'Pagamento', value: PAYMENT_METHOD[payment] || payment }]}
+        saving={saving}
+        onCancel={() => setConfirmando(false)}
+        onConfirm={submit}
+      />
     </div>
   );
 }
