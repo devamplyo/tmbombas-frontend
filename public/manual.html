@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Manual TM Bombas</title>
+<style>
+  :root {
+    --bg: #f4f7f9;
+    --surface: #ffffff;
+    --ink: #0f2230;
+    --muted: #52687a;
+    --line: #d6e0e7;
+    --accent: #0a78a6;
+    --accent-ink: #ffffff;
+    --accent-soft: #e0f0f7;
+    --note-bg: #e8f3f9;
+    --note-line: #0a78a6;
+    --warn-bg: #fdf1d8;
+    --warn-line: #b76a05;
+    --bad-bg: #fbe6e3;
+    --bad-line: #b3352a;
+    --ok: #17753f;
+    --btn-bg: #eaf1f5;
+    --btn-line: #b9c9d4;
+    --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+    --font-head: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c1821;
+      --surface: #132430;
+      --ink: #e5eef4;
+      --muted: #98acbb;
+      --line: #274152;
+      --accent: #52bde8;
+      --accent-ink: #062231;
+      --accent-soft: #143446;
+      --note-bg: #123244;
+      --note-line: #52bde8;
+      --warn-bg: #3a2c10;
+      --warn-line: #e3a13a;
+      --bad-bg: #3d1c19;
+      --bad-line: #ee7d72;
+      --ok: #5fd08d;
+      --btn-bg: #1c3444;
+      --btn-line: #38566b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1821;
+    --surface: #132430;
+    --ink: #e5eef4;
+    --muted: #98acbb;
+    --line: #274152;
+    --accent: #52bde8;
+    --accent-ink: #062231;
+    --accent-soft: #143446;
+    --note-bg: #123244;
+    --note-line: #52bde8;
+    --warn-bg: #3a2c10;
+    --warn-line: #e3a13a;
+    --bad-bg: #3d1c19;
+    --bad-line: #ee7d72;
+    --ok: #5fd08d;
+    --btn-bg: #1c3444;
+    --btn-line: #38566b;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    padding-inline: 16px;
+    padding-block: 0 64px;
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  a { color: var(--accent); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  .wrap { max-width: 1120px; margin-inline: auto; }
+
+  /* ---------- topo ---------- */
+  header.top { padding-block: 36px 24px; }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 8px; }
+  h1 {
+    font-family: var(--font-head); font-weight: 800; font-size: clamp(2rem, 5vw, 3.1rem);
+    line-height: 1.05; margin: 0 0 12px; text-wrap: balance; letter-spacing: -0.01em;
+  }
+  .lead { font-size: 1.15rem; color: var(--muted); max-width: 62ch; margin: 0; }
+
+  .perfis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 28px; }
+  .perfil-card {
+    display: block; text-decoration: none; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px;
+  }
+  .perfil-card:hover { border-color: var(--accent); }
+  .perfil-card strong { display: block; font-family: var(--font-head); font-size: 1.15rem; margin-bottom: 4px; }
+  .perfil-card span { color: var(--muted); font-size: .95rem; }
+
+  /* ---------- navegação ---------- */
+  .layout { display: grid; grid-template-columns: 1fr; gap: 0 48px; }
+  nav.toc { font-size: .95rem; }
+  nav.toc .grupo { font-family: var(--font-head); font-weight: 800; font-size: .9rem; margin: 18px 0 6px; color: var(--ink); }
+  nav.toc a { display: block; padding: 3px 0 3px 12px; text-decoration: none; color: var(--muted); border-left: 2px solid var(--line); }
+  nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+  /* celular: índice vira faixa que rola de lado */
+  nav.toc {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--bg); margin-inline: -16px; padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex; gap: 8px; overflow-x: auto; white-space: nowrap;
+  }
+  nav.toc .grupo { display: none; }
+  nav.toc a { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; background: var(--surface); }
+  nav.toc a.sub { display: none; }
+
+  @media (min-width: 940px) {
+    .layout { grid-template-columns: 250px minmax(0, 1fr); }
+    nav.toc {
+      display: block; overflow: visible; white-space: normal; margin: 0; padding: 0 0 24px;
+      border: 0; background: transparent; top: 16px; align-self: start;
+      max-height: calc(100vh - 32px); overflow-y: auto;
+    }
+    nav.toc .grupo { display: block; }
+    nav.toc a { border: 0; border-left: 2px solid var(--line); border-radius: 0; padding: 3px 0 3px 12px; background: transparent; }
+    nav.toc a.sub { display: block; }
+    nav.toc a.chip-only { display: none; }
+  }
+
+  /* ---------- conteúdo ---------- */
+  main { min-width: 0; }
+  section.perfil { padding-top: 40px; }
+  section.perfil > h2 {
+    font-family: var(--font-head); font-weight: 800; font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+    line-height: 1.1; margin: 0 0 6px; text-wrap: balance; scroll-margin-top: 72px;
+  }
+  .quem { color: var(--muted); margin: 0 0 20px; max-width: 65ch; }
+  h3 {
+    font-family: var(--font-head); font-weight: 800; font-size: 1.3rem; line-height: 1.2;
+    margin: 0 0 8px; text-wrap: balance; scroll-margin-top: 72px;
+  }
+  .tela { padding-block: 20px; border-top: 1px solid var(--line); }
+  .tela p, .tela li, .tela dd { max-width: 68ch; }
+  .tela p { margin: 0 0 10px; }
+  .menu-tag { display: inline-block; font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+
+  /* botões e campos citados no texto — iguais ao que se vê na tela */
+  .b {
+    display: inline-block; font-weight: 700; font-size: .92em; line-height: 1.35;
+    background: var(--btn-bg); border: 1px solid var(--btn-line); border-radius: 6px; padding: 0 7px; white-space: nowrap;
+  }
+  .campo { font-weight: 700; }
+
+  ol.passos { list-style: none; counter-reset: passo; margin: 10px 0 14px; padding: 0; display: grid; gap: 8px; }
+  ol.passos > li { counter-increment: passo; display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; }
+  ol.passos > li::before {
+    content: counter(passo); width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .9rem;
+    display: grid; place-items: center; margin-top: 1px;
+  }
+  ul.lista { margin: 8px 0 12px; padding-left: 22px; }
+  ul.lista li { margin-bottom: 4px; }
+
+  .aviso {
+    margin: 14px 0; padding: 12px 16px; border-radius: 8px; background: var(--note-bg);
+    border-left: 4px solid var(--note-line); max-width: 68ch;
+  }
+  .aviso.atencao { background: var(--warn-bg); border-left-color: var(--warn-line); }
+  .aviso.erro { background: var(--bad-bg); border-left-color: var(--bad-line); }
+  .aviso strong.t { display: block; font-size: .85rem; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 2px; }
+  .aviso p { margin: 0; }
+  .aviso p + p { margin-top: 6px; }
+
+  .tabela { overflow-x: auto; margin: 12px 0 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); background: var(--bg); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.sim { color: var(--ok); font-weight: 700; text-align: center; }
+  td.nao { color: var(--muted); text-align: center; }
+
+  /* fluxos entre telas */
+  .fluxo { display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: center; margin: 10px 0 8px; }
+  .fluxo .etapa {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font-size: .95rem;
+  }
+  .fluxo .etapa small { display: block; color: var(--muted); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .fluxo .seta { color: var(--muted); padding-inline: 2px; }
+  .fluxo-titulo { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; margin: 22px 0 0; }
+
+  dl.termos { display: grid; grid-template-columns: minmax(130px, 200px) 1fr; gap: 8px 16px; margin: 10px 0 14px; }
+  dl.termos dt { font-weight: 700; }
+  dl.termos dd { margin: 0; color: var(--ink); }
+  @media (max-width: 560px) { dl.termos { grid-template-columns: 1fr; gap: 0; } dl.termos dd { margin-bottom: 10px; } }
+
+  footer.fim { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+
+  @media print {
+    nav.toc { display: none; }
+    body { background: #fff; color: #000; }
+    .layout { display: block; }
+  }
+</style>
+<style>
+  @font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-style: normal; font-display: swap; src: url("/manual-fontes/atkinson-400.woff2") format("woff2"); }
+  @font-face { font-family: "Atkinson Hyperlegible"; font-weight: 700; font-style: normal; font-display: swap; src: url("/manual-fontes/atkinson-700.woff2") format("woff2"); }
+  @font-face { font-family: "Bricolage Grotesque"; font-weight: 600 800; font-style: normal; font-display: swap; src: url("/manual-fontes/bricolage-800.woff2") format("woff2"); }
+</style>
+<style>
+  @page { size: A4; margin: 16mm 14mm 18mm; }
+  @media print {
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-size: 10.5pt; line-height: 1.5; padding: 0; background: #fff; }
+    .wrap { max-width: none; }
+    nav.toc { display: none !important; }
+    .layout { display: block; }
+    header.top { padding-block: 0 14px; }
+    h1 { font-size: 30pt; }
+    section.perfil { padding-top: 0; break-before: page; }
+    section#comecar { break-before: auto; padding-top: 6px; }
+    section.perfil > h2 { font-size: 21pt; break-after: avoid; }
+    h3 { font-size: 13.5pt; break-after: avoid; }
+    .tela p, .tela li, .tela dd, .aviso { max-width: none; }
+    .aviso, .fluxo, tr, dl.termos > *, ol.passos > li, .perfil-card { break-inside: avoid; }
+    .tabela { overflow: visible; }
+    table { font-size: 9pt; } th, td { padding: 5px 8px; } th { white-space: normal; font-size: 7.5pt; }
+    td:first-child { min-width: 46mm; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Sistema de Gestão Integrada</p>
+    <h1>Manual do sistema TM Bombas</h1>
+    <p class="lead">Como usar cada tela, passo a passo. Escolha o seu perfil abaixo: cada um vê só as telas que precisa.</p>
+
+    <div class="perfis">
+      <a class="perfil-card" href="#adm"><strong>ADM Master</strong><span>Financeiro, usuários, estoque, ordens de serviço e notas fiscais</span></a>
+      <a class="perfil-card" href="#interno"><strong>Vendedor Interno</strong><span>Frente de caixa (PDV), vendas do dia e estoque</span></a>
+      <a class="perfil-card" href="#externo"><strong>Vendedor Externo</strong><span>Vendas em campo, pedidos, orçamentos e clientes</span></a>
+      <a class="perfil-card" href="#condominial"><strong>Funcionário Condominial</strong><span>Agenda, atendimentos com fotos e ordens de serviço</span></a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Índice do manual">
+      <span class="grupo">Começar</span>
+      <a href="#comecar">Primeiros passos</a>
+      <a class="sub" href="#quem-faz-o-que">Quem faz o quê</a>
+
+      <span class="grupo">ADM Master</span>
+      <a href="#adm">ADM Master</a>
+      <a class="sub" href="#adm-dashboard">Dashboard</a>
+      <a class="sub" href="#adm-financeiro">Financeiro</a>
+      <a class="sub" href="#adm-clientes">Clientes</a>
+      <a class="sub" href="#adm-estoque">Estoque</a>
+      <a class="sub" href="#adm-manutencao">Manutenção Preventiva</a>
+      <a class="sub" href="#adm-os">Ordens de Serviço</a>
+      <a class="sub" href="#adm-notas">Notas Fiscais</a>
+      <a class="sub" href="#adm-delegacao">Delegação de Serviços</a>
+      <a class="sub" href="#adm-colaboradores">Colaboradores</a>
+      <a class="sub" href="#adm-externas">Vendas Externas</a>
+      <a class="sub" href="#adm-usuarios">Usuários</a>
+
+      <span class="grupo">Outros perfis</span>
+      <a href="#interno">Vendedor Interno</a>
+      <a class="sub" href="#vi-pdv">PDV / Vendas</a>
+      <a class="sub" href="#vi-dia">Vendas do dia</a>
+      <a class="sub" href="#vi-estoque">Estoque</a>
+      <a href="#externo">Vendedor Externo</a>
+      <a class="sub" href="#ve-clientes">Clientes e novo pedido</a>
+      <a class="sub" href="#ve-orcamentos">Orçamentos</a>
+      <a href="#condominial">Funcionário Condominial</a>
+      <a class="sub" href="#fc-agenda">Agenda e tarefas</a>
+      <a class="sub" href="#fc-orcamentos">Orçamentos / OS</a>
+
+      <span class="grupo">Para todos</span>
+      <a href="#fluxos">Como as telas se conectam</a>
+      <a href="#duvidas">Dúvidas e avisos</a>
+    </nav>
+
+    <main>
+
+      <!-- ======================= COMEÇAR ======================= -->
+      <section class="perfil" id="comecar" style="padding-top:8px">
+        <h2>Primeiros passos</h2>
+        <p class="quem">Vale para todos os perfis.</p>
+
+        <div class="tela">
+          <h3>Entrar no sistema</h3>
+          <ol class="passos">
+            <li><span>Abra <strong>tmbombas.online</strong> no navegador. Funciona no computador, no tablet e no celular.</span></li>
+            <li><span>Digite a sua <span class="campo">Matrícula</span> e a sua <span class="campo">Senha</span>.</span></li>
+            <li><span>Clique em <span class="b">Entrar</span>.</span></li>
+            <li><span>Na tela <strong>Selecione seu perfil de acesso</strong>, clique em <span class="b">Acessar</span> no seu perfil.</span></li>
+          </ol>
+          <p>A matrícula e a senha são criadas pelo ADM Master. Se esquecer a senha, peça a ele para trocar (veja <a href="#adm-usuarios">Usuários</a>).</p>
+          <div class="aviso">
+            <strong class="t">Sessão</strong>
+            <p>Depois de 30 minutos sem usar o sistema, ele sai sozinho por segurança. É só entrar de novo. Para sair antes, use o botão <span class="b">Sair</span> no menu.</p>
+          </div>
+        </div>
+
+        <div class="tela">
+          <h3>Como se movimentar</h3>
+          <ul class="lista">
+            <li>No <strong>computador</strong>, o menu fica sempre à esquerda.</li>
+            <li>No <strong>celular</strong> e no tablet, o menu abre pelo botão de três traços no canto de cima.</li>
+            <li>Quando você salva, apaga ou envia algo, aparece um aviso rápido na tela ("Cliente cadastrado.", "Produto atualizado." e assim por diante). Aviso vermelho quer dizer que <strong>não gravou</strong>: leia o texto, corrija e tente de novo.</li>
+            <li>Campos com <strong>*</strong> (asterisco) são obrigatórios.</li>
+            <li>Nas janelas que se abrem por cima da tela, a tecla <strong>Esc</strong> ou o <strong>X</strong> fecham sem salvar.</li>
+          </ul>
+        </div>
+
+        <div class="tela" id="quem-faz-o-que">
+          <h3>Quem faz o quê</h3>
+          <div class="tabela">
+            <table>
+              <thead><tr><th>Tarefa</th><th>ADM Master</th><th>Vendedor Interno</th><th>Vendedor Externo</th><th>Funcionário Condominial</th></tr></thead>
+              <tbody>
+                <tr><td>Vender no balcão (PDV)</td><td class="nao">—</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Enviar pedido de venda externa</td><td class="nao">—</td><td class="nao">—</td><td class="sim">Sim</td><td class="nao">—</td></tr>
+                <tr><td>Aprovar (faturar) pedido externo</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Cadastrar cliente</td><td class="sim">Sim (direto)</td><td class="nao">—</td><td class="sim">Sim (o ADM aprova)</td><td class="nao">—</td></tr>
+                <tr><td>Cadastrar produto e dar entrada no estoque</td><td class="sim">Sim</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Criar orçamento ou OS</td><td class="nao">—</td><td class="nao">—</td><td class="sim">Orçamento</td><td class="sim">Sim</td></tr>
+                <tr><td>Validar ou recusar orçamento e OS</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Registrar atendimento com fotos</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td><td class="sim">Sim</td></tr>
+                <tr><td>Cancelar venda finalizada</td><td class="sim">Sim</td><td class="sim">Só com a senha do ADM</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Emitir e cancelar nota fiscal</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Criar usuários e trocar senhas</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= ADM ======================= -->
+      <section class="perfil" id="adm">
+        <h2>ADM Master</h2>
+        <p class="quem">Tem acesso a tudo: dinheiro, cadastros, aprovações, notas fiscais e usuários. É quem libera o trabalho dos outros perfis.</p>
+
+        <div class="tela" id="adm-dashboard">
+          <span class="menu-tag">Menu · Dashboard</span>
+          <h3>Dashboard</h3>
+          <p>Resumo do negócio ao abrir o sistema. Os cartões mostram: <strong>Vendas consolidadas</strong>, <strong>A receber</strong>, <strong>Clientes</strong>, <strong>Produtos em estoque</strong>, <strong>Estoque baixo</strong>, <strong>OS aguardando validação</strong> e <strong>Pedidos externos pendentes</strong>.</p>
+          <ul class="lista">
+            <li><strong>Pedidos externos aguardando consolidação</strong>: lista dos pedidos que os vendedores externos enviaram e esperam a sua decisão.</li>
+            <li><strong>Estoque baixo</strong>: produtos abaixo do mínimo. Se estiver tudo certo, aparece "Estoque saudável".</li>
+            <li><strong>Últimas ordens de serviço</strong>: use <span class="b">Ver registros e fotos</span> para ver o que o técnico anotou e fotografou no atendimento.</li>
+          </ul>
+        </div>
+
+        <div class="tela" id="adm-financeiro">
+          <span class="menu-tag">Menu · Financeiro</span>
+          <h3>Financeiro (Visão Financeira)</h3>
+          <p>Entradas, saídas e valores a receber.</p>
+          <dl class="termos">
+            <dt>Receita (vendas)</dt><dd>Dinheiro das vendas.</dd>
+            <dt>Gastos (entradas estoque)</dt><dd>Quanto foi gasto comprando produtos para o estoque.</dd>
+            <dt>Saldo</dt><dd>Receita menos gastos.</dd>
+            <dt>A receber</dt><dd>Serviços concluídos que ainda não foram pagos.</dd>
+          </dl>
+          <p>Mais abaixo: o gráfico <strong>Entradas x Saídas por período</strong> (Dia, Semana ou Mês), <strong>Gastos por fornecedor</strong> e <strong>Últimas entradas de estoque</strong>.</p>
+          <h3 style="font-size:1.05rem;margin-top:14px">Confirmar que o cliente pagou</h3>
+          <ol class="passos">
+            <li><span>Na lista <strong>A receber — Ordens de Serviço concluídas</strong>, ache o serviço.</span></li>
+            <li><span>Clique em <span class="b">Confirmar</span>. Aparece "Recebimento confirmado."</span></li>
+          </ol>
+        </div>
+
+        <div class="tela" id="adm-clientes">
+          <span class="menu-tag">Menu · Clientes</span>
+          <h3>Clientes</h3>
+          <h3 style="font-size:1.05rem;margin-top:10px">Cadastrar um cliente</h3>
+          <ol class="passos">
+            <li><span>Clique em <span class="b">Novo cliente</span>.</span></li>
+            <li><span>Preencha <span class="campo">Nome</span>, <span class="campo">Tipo</span> (pessoa física ou jurídica) e <span class="campo">Documento (CPF/CNPJ)*</span>. Preencha também e-mail, telefone e o endereço completo (Rua, Número, Bairro, Cidade, UF e CEP).</span></li>
+            <li><span>Se for empresa que paga ICMS, preencha a <span class="campo">Inscrição estadual</span>. Se não tiver, deixe em branco.</span></li>
+            <li><span>Clique em <span class="b">Salvar</span>. Aparece "Cliente cadastrado."</span></li>
+          </ol>
+          <p><strong>Editar:</strong> use a busca (<em>Buscar por nome ou documento…</em>), clique no cliente, mude o que precisar e salve. Aparece "Cliente atualizado."</p>
+          <p><strong>Clientes cadastrados pelo Vendedor Externo</strong> chegam como <em>Aguardando validação</em>. Clique em <span class="b">Aprovar</span> para liberar, ou em <span class="b">Rejeitar</span> e escreva o motivo (obrigatório).</p>
+          <div class="aviso">
+            <strong class="t">Importante para nota fiscal</strong>
+            <p>CPF/CNPJ e endereço corretos são necessários para emitir nota. A nota de serviço é recusada se o CNPJ do cliente for inválido.</p>
+          </div>
+          <p>O sistema não tem botão para excluir cliente.</p>
+        </div>
+
+        <div class="tela" id="adm-estoque">
+          <span class="menu-tag">Menu · Estoque</span>
+          <h3>Estoque</h3>
+          <p>Três abas: <span class="b">Todos os Produtos</span>, <span class="b">Estoque Baixo</span> e <span class="b">Histórico de Saídas</span>. No topo: <strong>Total de Produtos</strong> e <strong>Valor Imobilizado</strong>.</p>
+          <h3 style="font-size:1.05rem;margin-top:10px">Cadastrar um produto</h3>
+          <ol class="passos">
+            <li><span>Clique em <span class="b">Novo produto</span>.</span></li>
+            <li><span>Obrigatórios: <span class="campo">Nome*</span>, <span class="campo">SKU*</span>, <span class="campo">Código de barras*</span> e <span class="campo">Fabricante*</span>. O SKU e o código de barras não podem se repetir.</span></li>
+            <li><span>Escolha a <span class="campo">Categoria</span> (Bomba, Filtro, Motor, Peça de reposição, Acessório ou Produto químico) e preencha <span class="campo">Preço de venda</span>, <span class="campo">Qtd. em estoque</span>, <span class="campo">Estoque mínimo</span> e <span class="campo">Unidade</span>.</span></li>
+            <li><span>Preencha os <strong>dados fiscais</strong>: <span class="campo">NCM</span> (8 números), <span class="campo">CFOP</span> (4 números, ex.: 5102), <span class="campo">CSOSN</span> (3 números, ex.: 102) e <span class="campo">Origem da mercadoria</span>.</span></li>
+            <li><span>Clique em <span class="b">Salvar</span>.</span></li>
+          </ol>
+          <div class="aviso atencao">
+            <strong class="t">Selo "Sem código fiscal"</strong>
+            <p>Produto sem NCM mostra esse selo amarelo na lista. Ele vende normalmente, mas <strong>a nota fiscal dele não sai</strong> enquanto os dados fiscais não forem preenchidos.</p>
+          </div>
+          <p><strong>Editar:</strong> clique no produto, mude e salve. <strong>Desativar/Ativar:</strong> botão na linha do produto. Produto desativado deixa de ser vendido, mas continua no histórico. Não existe botão de excluir produto.</p>
+        </div>
+
+        <div class="tela" id="adm-manutencao">
+          <span class="menu-tag">Menu · Manutenção Preventiva</span>
+          <h3>Manutenção Preventiva</h3>
+          <p>Planos de manutenção que se repetem, por cliente (por exemplo, revisar a bomba de um condomínio a cada 90 dias).</p>
+          <ol class="passos">
+            <li><span>Clique em <span class="b">Novo plano</span>.</span></li>
+            <li><span>Escolha o <span class="campo">Cliente*</span> e o <span class="campo">Técnico*</span>, informe a <span class="campo">Frequência (dias)*</span> e, se quiser, a descrição e a <span class="campo">Última manutenção</span>.</span></li>
+            <li><span>Salve. Aparece "Plano de manutenção criado."</span></li>
+            <li><span>Quando chegar a hora, clique em <span class="b">Liberar</span> no plano e escolha o <span class="campo">Técnico responsável*</span>. Aparece "Manutenção liberada pro técnico." e ela surge no painel do técnico em <em>Próximas manutenções</em>.</span></li>
+          </ol>
+        </div>
+
+        <div class="tela" id="adm-os">
+          <span class="menu-tag">Menu · Ordens de Serviço</span>
+          <h3>Ordens de Serviço</h3>
+          <p>Aqui você valida e acompanha os orçamentos e as OS criados pelos técnicos e pelos vendedores externos. Quatro abas: <span class="b">Aguardando</span>, <span class="b">Validadas</span>, <span class="b">Recusadas</span> e <span class="b">Concluídas</span>.</p>
+          <div class="fluxo" aria-label="Caminho de uma OS">
+            <span class="etapa"><small>Criada</small>Aguardando validação</span><span class="seta">→</span>
+            <span class="etapa"><small>Você decide</small>Validada</span><span class="seta">→</span>
+            <span class="etapa"><small>Técnico atende</small>Em execução</span><span class="seta">→</span>
+            <span class="etapa"><small>Fim</small>Concluída</span>
+          </div>
+          <p>Em qualquer ponto antes de validar você pode recusar (<em>Não validada</em>), e uma OS em execução pode ser <em>Cancelada</em>.</p>
+          <ol class="passos">
+            <li><span>Na aba <strong>Aguardando</strong>, clique em <span class="b">Detalhes</span> para ler o pedido.</span></li>
+            <li><span>Clique em <span class="b">Validar</span> para aprovar ou em <span class="b">Recusar</span> para negar. Aparece "Status atualizado."</span></li>
+            <li><span>Depois, no <strong>Detalhes</strong> da OS, use os botões de status para avançar: <em>Em execução</em>, depois <em>Concluída</em> (ou <em>Cancelada</em>).</span></li>
+            <li><span>Com a OS concluída e o cliente tendo pago, clique em <span class="b">Confirmar recebimento</span>.</span></li>
+            <li><span>Para emitir a nota de serviço, use o bloco <strong>Nota Fiscal de Serviço</strong> no mesmo Detalhes (<span class="b">Emitir NFS-e</span>). O status atualiza sozinho, a cada 2 segundos, sem precisar recarregar.</span></li>
+          </ol>
+        </div>
+
+        <div class="tela" id="adm-notas">
+          <span class="menu-tag">Menu · Notas Fiscais</span>
+          <h3>Notas Fiscais</h3>
+          <p>Aqui saem as notas de <strong>venda (NF-e)</strong> e de <strong>serviço (NFS-e)</strong>. É uma tela só do ADM Master.</p>
+          <div class="aviso atencao">
+            <strong class="t">Ambiente de homologação</strong>
+            <p>Hoje o sistema emite notas no ambiente de <strong>homologação</strong> (de teste). Elas saem com a marca <strong>"SEM VALOR FISCAL"</strong> e não valem perante a Receita. A troca para produção é feita fora da tela, pela equipe técnica.</p>
+          </div>
+
+          <h3 style="font-size:1.05rem;margin-top:12px">A tela, de cima para baixo</h3>
+          <dl class="termos">
+            <dt>Cartões de status</dt><dd><strong>Autorizadas</strong>, <strong>Processando</strong>, <strong>Com erro</strong> e <strong>Canceladas</strong>. Clicar num deles filtra a tabela lá embaixo.</dd>
+            <dt>Aguardando nota</dt><dd>Vendas e serviços que ainda não têm nota, em cartões. Abas <em>Todas</em>, <em>Vendas · NF-e</em> e <em>Serviços · NFS-e</em>, com busca. Cada cartão mostra os 3 primeiros itens; <span class="b">Ver todos os N itens</span> abre a lista completa numa janela.</dd>
+            <dt>Notas emitidas</dt><dd>Tabela com todas as notas, com filtro próprio (tipo, busca e status). O filtro de cima e o de baixo são independentes.</dd>
+          </dl>
+
+          <h3 style="font-size:1.05rem;margin-top:12px">Emitir NF-e (nota de uma venda)</h3>
+          <ol class="passos">
+            <li><span>No cartão da venda em <strong>Aguardando nota</strong>, clique em <span class="b">Emitir NF-e</span>.</span></li>
+            <li><span>Na janela <strong>Quem recebe a NF-e?</strong>, escolha um <em>cliente cadastrado</em> ou <span class="b">Digitar os dados</span> (Nome, CPF ou CNPJ e endereço).</span></li>
+            <li><span>Na tela <strong>Confira a NF-e</strong>, revise itens e valor e clique em <span class="b">Emitir NF-e</span>.</span></li>
+            <li><span>A nota abre em <strong>Andamento</strong>: primeiro "Processando", depois "Autorizada". Não precisa recarregar.</span></li>
+          </ol>
+          <p>Todos os produtos da venda precisam ter os dados fiscais (NCM, CFOP e CSOSN). Se faltar, o sistema avisa antes de enviar.</p>
+
+          <h3 style="font-size:1.05rem;margin-top:12px">Emitir NFS-e (nota de um serviço)</h3>
+          <ol class="passos">
+            <li><span>No cartão da OS concluída, clique em <span class="b">Emitir NFS-e</span>. (Também dá para emitir dentro da OS, em Ordens de Serviço.)</span></li>
+            <li><span>Confira e clique em <span class="b">Emitir NFS-e</span>.</span></li>
+          </ol>
+          <p>O cliente da OS precisa ter <strong>CNPJ/CPF válido</strong> e endereço. Com CNPJ inválido a prefeitura recusa e a nota fica <em>Com erro</em>.</p>
+
+          <h3 style="font-size:1.05rem;margin-top:12px">Depois de emitida</h3>
+          <ul class="lista">
+            <li><strong>Ver a nota:</strong> clique na linha na tabela. Abre o detalhe com a chave de acesso, os itens e o andamento.</li>
+            <li><strong>Baixar:</strong> no detalhe, <span class="b">Baixar DANFE</span> (PDF) e <span class="b">XML</span>.</li>
+            <li><strong>Cancelar:</strong> no detalhe, clique em <span class="b">Cancelar nota</span> e escreva a justificativa. Ela precisa ter <strong>pelo menos 15 caracteres</strong>. Há prazo legal para cancelar em produção. Uma venda com nota cancelada volta para <em>Aguardando nota</em>.</li>
+            <li><strong>Com erro:</strong> abra a nota e leia o motivo que a Receita ou a prefeitura devolveu. Corrija o cadastro indicado (por exemplo, o CNPJ do cliente).</li>
+          </ul>
+        </div>
+
+        <div class="tela" id="adm-delegacao">
+          <span class="menu-tag">Menu · Delegação de Serviços</span>
+          <h3>Delegação de Serviços</h3>
+          <p>Marcar uma tarefa para um técnico. Ela aparece na agenda dele.</p>
+          <ol class="passos">
+            <li><span>Em <strong>Nova Tarefa</strong>, escolha o <span class="campo">Colaborador*</span> e a <span class="campo">Data*</span>.</span></li>
+            <li><span>Se quiser, informe <span class="campo">Horário</span>, <span class="campo">Cliente</span> e a <span class="campo">OS vinculada</span>.</span></li>
+            <li><span>Escreva a <span class="campo">Descrição*</span> do que deve ser feito.</span></li>
+            <li><span>Clique em <span class="b">Agendar Tarefa</span>. Aparece "Tarefa delegada." e ela entra em <strong>Tarefas Recentes</strong>.</span></li>
+          </ol>
+        </div>
+
+        <div class="tela" id="adm-colaboradores">
+          <span class="menu-tag">Menu · Colaboradores</span>
+          <h3>Colaboradores</h3>
+          <p>Acompanhe o trabalho de cada funcionário. Use a busca (<em>nome ou matrícula</em>) e clique na pessoa. O perfil mostra <strong>Ordens de Serviço</strong>, <strong>Concluídas</strong>, <strong>Vendas</strong> e <strong>Receita gerada</strong>, com filtro por período (<span class="campo">De</span> e <span class="campo">Até</span>) e por <span class="campo">Status</span>, além do histórico de OS e de vendas. <span class="b">Voltar</span> retorna à lista.</p>
+        </div>
+
+        <div class="tela" id="adm-externas">
+          <span class="menu-tag">Menu · Vendas Externas</span>
+          <h3>Vendas Externas</h3>
+          <p>Pedidos que os vendedores externos enviaram. Abas <span class="b">Reservas</span> e <span class="b">Produtividade</span>, com período de 7, 30, 90 dias ou tudo.</p>
+          <ol class="passos">
+            <li><span>Leia o pedido na aba <strong>Reservas</strong>.</span></li>
+            <li><span>Para aprovar, clique em <span class="b">Faturar Pedido</span>. O sistema baixa o estoque e cria a conta a receber. Aparece "Pedido faturado — estoque baixado e conta a receber gerada."</span></li>
+            <li><span>Para negar, clique em <span class="b">Recusar</span>, escreva o <span class="campo">Motivo da recusa*</span> (por exemplo, "produto sem estoque suficiente") e confirme em <span class="b">Recusar pedido</span>. O vendedor vê o motivo.</span></li>
+          </ol>
+        </div>
+
+        <div class="tela" id="adm-usuarios">
+          <span class="menu-tag">Menu · Usuários</span>
+          <h3>Usuários</h3>
+          <p>Quem pode entrar no sistema e com qual perfil.</p>
+          <h3 style="font-size:1.05rem;margin-top:10px">Criar um usuário</h3>
+          <ol class="passos">
+            <li><span>Clique em <span class="b">Novo usuário</span>.</span></li>
+            <li><span>Preencha <span class="campo">Nome completo*</span>, <span class="campo">Matrícula*</span> e <span class="campo">Senha</span> (mínimo de 6 caracteres).</span></li>
+            <li><span>Marque <strong>um</strong> perfil de acesso: Vendedor Interno, Vendedor Externo ou Funcionário Condominial.</span></li>
+            <li><span>Clique em <span class="b">Salvar</span>. Aparece "Usuário criado." A matrícula não pode repetir.</span></li>
+          </ol>
+
+          <h3 style="font-size:1.05rem;margin-top:14px">Trocar a senha de um usuário</h3>
+          <p>Não há um botão "Redefinir senha": a troca é feita pela edição do usuário.</p>
+          <ol class="passos">
+            <li><span>Na lista, na linha do usuário, clique em <span class="b">Editar</span>.</span></li>
+            <li><span>O campo <span class="campo">Senha</span> abre vazio (vazio quer dizer "manter a atual"). Digite a <strong>senha nova</strong> (mínimo de 6 caracteres).</span></li>
+            <li><span>Clique em <span class="b">Salvar</span>. Aparece "Usuário atualizado."</span></li>
+          </ol>
+          <p>Vale na hora: o usuário entra com a senha nova e a antiga deixa de funcionar. Se você salvar com o campo em branco, a senha continua a mesma.</p>
+
+          <h3 style="font-size:1.05rem;margin-top:14px">Bloquear e liberar</h3>
+          <p><span class="b">Desativar</span> impede o usuário de entrar, sem apagar nada. <span class="b">Ativar</span> libera de novo. O ADM Master não pode se desativar. Não existe botão de excluir usuário, e a matrícula não pode ser mudada depois de criada.</p>
+          <div class="aviso atencao">
+            <strong class="t">No celular</strong>
+            <p>A tabela de usuários é larga. No celular só aparecem Nome e Matrícula, e os botões <span class="b">Editar</span> e <span class="b">Desativar</span> ficam à direita: <strong>arraste a tabela para o lado</strong> para achá-los.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= VENDEDOR INTERNO ======================= -->
+      <section class="perfil" id="interno">
+        <h2>Vendedor Interno</h2>
+        <p class="quem">Trabalha na loja: vende no balcão, acompanha as vendas do dia e cuida do estoque.</p>
+
+        <div class="tela">
+          <span class="menu-tag">Menu · Dashboard</span>
+          <h3>Dashboard</h3>
+          <p>Resumo do seu dia: <strong>Vendas hoje</strong>, <strong>Receita hoje</strong>, <strong>Produtos ativos</strong> e <strong>Estoque baixo</strong>.</p>
+        </div>
+
+        <div class="tela" id="vi-pdv">
+          <span class="menu-tag">Menu · PDV / Vendas</span>
+          <h3>PDV: fazer uma venda</h3>
+          <ol class="passos">
+            <li><span>Procure o produto em <em>Buscar por nome, código de barras ou SKU…</em>.</span></li>
+            <li><span>Clique no produto para colocá-lo no carrinho. No carrinho, use <strong>+</strong> e <strong>−</strong> para mudar a quantidade ou remova o item.</span></li>
+            <li><span>Se quiser, escreva o <span class="campo">Nome do cliente (opcional)</span>.</span></li>
+            <li><span>Escolha a <span class="campo">Forma de pagamento</span>: Dinheiro, PIX, Cartão de Crédito ou Cartão de Débito.</span></li>
+            <li><span>Clique em <span class="b">Finalizar venda</span> e, na janela <strong>Confirmar venda</strong>, em <span class="b">Confirmar</span>. (<span class="b">Voltar</span> retorna ao carrinho.)</span></li>
+            <li><span>Aparece <strong>Venda concluída</strong> com o número da venda. Clique em <span class="b">Fechar</span>.</span></li>
+          </ol>
+          <ul class="lista">
+            <li>Carrinho vazio ou produto sem estoque suficiente: o sistema recusa ("Carrinho vazio.", "Sem estoque suficiente.").</li>
+            <li>A venda baixa o estoque na hora.</li>
+            <li>O botão <span class="b">Cancelar venda</span> ao lado do carrinho só <strong>esvazia o carrinho</strong> antes de finalizar. Para desfazer uma venda já concluída, veja <a href="#vi-dia">Vendas do dia</a>.</li>
+            <li>O vendedor interno não emite nota. A venda fica em <em>Aguardando nota</em> para o ADM Master emitir.</li>
+          </ul>
+          <div class="aviso atencao">
+            <strong class="t">Cuidado com o botão de nota</strong>
+            <p>Na janela <strong>Venda concluída</strong> existe o botão <span class="b">Emitir Nota Fiscal de Venda (simulação)</span>. Ele só gera um PDF de <strong>prévia, sem valor fiscal</strong>. Nenhuma nota de verdade é emitida por ali: a nota real é emitida pelo ADM Master em Notas Fiscais.</p>
+          </div>
+        </div>
+
+        <div class="tela" id="vi-dia">
+          <span class="menu-tag">Menu · Vendas do dia</span>
+          <h3>Vendas do dia</h3>
+          <p>Todas as vendas feitas hoje. Se uma venda foi feita por engano, ela pode ser cancelada, mas <strong>só com a autorização do ADM Master</strong>:</p>
+          <ol class="passos">
+            <li><span>Na venda, clique em <span class="b">Cancelar</span>.</span></li>
+            <li><span>Preencha o <span class="campo">Motivo do cancelamento*</span>.</span></li>
+            <li><span>O ADM Master digita a <span class="campo">Matrícula do ADM*</span> e a <span class="campo">Senha do ADM*</span> dele.</span></li>
+            <li><span>Confirme. Aparece "Venda cancelada e estoque restaurado."</span></li>
+          </ol>
+        </div>
+
+        <div class="tela" id="vi-estoque">
+          <span class="menu-tag">Menu · Estoque</span>
+          <h3>Controle de Estoque</h3>
+          <p>Três abas: <span class="b">Novo Produto</span>, <span class="b">Entrada de Lote</span> e <span class="b">Fornecedores</span>.</p>
+          <dl class="termos">
+            <dt>Novo Produto</dt><dd>Mesmo cadastro do ADM: <span class="campo">Nome*</span>, <span class="campo">SKU*</span>, <span class="campo">Código de barras*</span>, <span class="campo">Fabricante*</span>, categoria, preço, quantidade e mínimo. Clique em <span class="b">Salvar Produto</span>. (Os dados fiscais, NCM e outros, são preenchidos pelo ADM.)</dd>
+            <dt>Entrada de Lote</dt><dd>Quando chegam produtos do fornecedor: escolha o <span class="campo">Produto*</span>, o <span class="campo">Fornecedor</span>, a <span class="campo">Quantidade*</span>, o <span class="campo">Custo unitário</span> e o <span class="campo">Nº da nota fiscal</span>, e clique em <span class="b">Salvar Entrada</span>. Aparece "Entrada de estoque registrada."</dd>
+            <dt>Fornecedores</dt><dd>Cadastre <span class="campo">Nome*</span>, CNPJ, telefone, e-mail e contato e clique em <span class="b">Salvar Fornecedor</span>. A lista <strong>Fornecedores cadastrados</strong> fica logo abaixo.</dd>
+          </dl>
+        </div>
+
+        <div class="tela">
+          <span class="menu-tag">Menu · Clientes</span>
+          <h3>Clientes</h3>
+          <p>Lista dos clientes ativos, com busca por nome ou documento. É só consulta.</p>
+        </div>
+      </section>
+
+      <!-- ======================= VENDEDOR EXTERNO ======================= -->
+      <section class="perfil" id="externo">
+        <h2>Vendedor Externo</h2>
+        <p class="quem">Trabalha na rua: cadastra clientes, envia pedidos e orçamentos. Nada disso vale até o ADM Master aprovar.</p>
+
+        <div class="tela">
+          <span class="menu-tag">Menu · Dashboard</span>
+          <h3>Dashboard</h3>
+          <p>Seus números: <strong>Vendas Hoje</strong>, <strong>Total no Mês</strong>, <strong>Pedidos Reserva</strong> (pedidos que aguardam o ADM) e <strong>Clientes</strong>.</p>
+        </div>
+
+        <div class="tela" id="ve-clientes">
+          <span class="menu-tag">Menu · Clientes e Meus Pedidos</span>
+          <h3>Cliente novo e pedido</h3>
+          <ol class="passos">
+            <li><span>Em <strong>Clientes</strong>, procure o cliente (nome, CNPJ ou telefone). Se ele não existir, clique em <span class="b">Novo cliente</span>, preencha <span class="campo">Nome*</span>, tipo, documento e contato e clique em <span class="b">Enviar para aprovação</span>. Aparece "Cliente cadastrado. Aguardando aprovação do ADM."</span></li>
+            <li><span>Clique no cliente. Você vê <strong>Dados do cliente</strong> e o <strong>Histórico de pedidos</strong>. Clique em <span class="b">Novo pedido</span>.</span></li>
+            <li><span>Procure os produtos, adicione os itens e escolha o <span class="campo">Pagamento</span>.</span></li>
+            <li><span>Envie. Aparece "Pedido enviado para o ADM aprovar."</span></li>
+          </ol>
+          <p>Se pedir mais do que existe no estoque, o sistema avisa (o ADM pode não conseguir aprovar).</p>
+          <p><strong>Meus Pedidos</strong> mostra tudo o que você enviou, com filtro e busca por cliente. Cada pedido está em um destes estados: <em>Aguardando ADM</em>, <em>Aprovado</em> ou <em>Rejeitado</em>. Quando rejeitado, o motivo aparece no pedido.</p>
+        </div>
+
+        <div class="tela" id="ve-orcamentos">
+          <span class="menu-tag">Menu · Orçamentos</span>
+          <h3>Orçamentos</h3>
+          <ol class="passos">
+            <li><span>Clique em <span class="b">Novo orçamento</span>.</span></li>
+            <li><span>Escolha o <span class="campo">Cliente*</span>, preencha a <span class="campo">Descrição do serviço*</span> e, se quiser, o <span class="campo">Valor estimado (R$)</span>.</span></li>
+            <li><span>Clique em <span class="b">Enviar para validação</span>. Aparece "Orçamento enviado para validação." O ADM decide em Ordens de Serviço.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ======================= FUNCIONÁRIO CONDOMINIAL ======================= -->
+      <section class="perfil" id="condominial">
+        <h2>Funcionário Condominial</h2>
+        <p class="quem">Técnico que atende os clientes e condomínios. Recebe tarefas do ADM, registra o que fez e cria orçamentos e OS.</p>
+
+        <div class="tela">
+          <span class="menu-tag">Menu · Dashboard</span>
+          <h3>Dashboard</h3>
+          <p>Mostra <strong>Hoje</strong>, <strong>Agendadas</strong> e <strong>Em andamento</strong>, a <strong>Agenda de hoje</strong> e as <strong>Próximas manutenções</strong> que o ADM liberou para você.</p>
+        </div>
+
+        <div class="tela" id="fc-agenda">
+          <span class="menu-tag">Menu · Minha Agenda</span>
+          <h3>Atender uma tarefa</h3>
+          <ol class="passos">
+            <li><span>Em <strong>Minha Agenda</strong> (ou no Dashboard), abra a tarefa do dia. A tela <strong>Detalhes da tarefa</strong> mostra o cliente e a <strong>Ordem de Serviço vinculada</strong>, se houver.</span></li>
+            <li><span>Ao chegar, clique em <span class="b">Iniciar</span>. Aparece "Serviço iniciado."</span></li>
+            <li><span>Em <strong>Registrar atendimento</strong>, escreva <span class="campo">O que foi feito</span> (ex.: "Troca do selo mecânico, limpeza do filtro") e/ou anexe <strong>até 6 fotos</strong>. É preciso pelo menos um texto ou uma foto.</span></li>
+            <li><span>Na tela <strong>Confira o registro antes de salvar</strong>, revise e salve. Aparece "Registro salvo." Você pode fazer vários registros no mesmo serviço.</span></li>
+            <li><span>Ao terminar, clique em <span class="b">Finalizar</span>. Aparece "Serviço concluído."</span></li>
+          </ol>
+          <p><strong>Histórico:</strong> todo o seu trabalho, com filtro por período (<span class="campo">De</span> e <span class="campo">Até</span>) e por <span class="campo">Status</span> (Agendadas, Em andamento, Concluídas).</p>
+          <p><strong>Clientes / Condomínios:</strong> busque por nome ou endereço. No cliente você vê os dados, o <strong>Histórico de serviços</strong> e, nas OS dele, pode <span class="b">Iniciar OS</span>, <span class="b">Adicionar registro</span> com fotos e <span class="b">Finalizar serviço da OS</span>. Também dá para ver o que já foi registrado em <span class="b">Ver registros e fotos</span>.</p>
+        </div>
+
+        <div class="tela" id="fc-orcamentos">
+          <span class="menu-tag">Menu · Orçamentos / OS</span>
+          <h3>Orçamentos e Ordens de Serviço</h3>
+          <ol class="passos">
+            <li><span>Clique em <span class="b">Novo</span>.</span></li>
+            <li><span>Escolha o <span class="campo">Tipo</span> (orçamento ou OS) e o <span class="campo">Cliente*</span>. Escreva a <span class="campo">Descrição*</span>, a <span class="campo">Data prevista</span> e o <span class="campo">Valor estimado</span>.</span></li>
+            <li><span>Para detalhar o preço, use <span class="b">Adicionar item</span>: nome do item e valor de cada um.</span></li>
+            <li><span>Clique em <span class="b">Enviar para validação</span>. Aparece "Criado e enviado para validação." O ADM decide em Ordens de Serviço.</span></li>
+          </ol>
+          <p>Use <span class="b">Gerar PDF</span> para baixar o orçamento e mostrar ao cliente.</p>
+        </div>
+      </section>
+
+      <!-- ======================= FLUXOS ======================= -->
+      <section class="perfil" id="fluxos">
+        <h2>Como as telas se conectam</h2>
+        <p class="quem">O trabalho passa de mão em mão. Estes são os caminhos mais comuns.</p>
+
+        <p class="fluxo-titulo">Venda de balcão até a nota</p>
+        <div class="fluxo">
+          <span class="etapa"><small>Vendedor Interno</small>Vende no PDV</span><span class="seta">→</span>
+          <span class="etapa"><small>Automático</small>Estoque baixa</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Notas Fiscais</small>Aguardando nota</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM</small>Emite NF-e</span>
+        </div>
+
+        <p class="fluxo-titulo">Pedido de venda externa</p>
+        <div class="fluxo">
+          <span class="etapa"><small>Vendedor Externo</small>Envia o pedido</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Vendas Externas</small>Faturar Pedido</span><span class="seta">→</span>
+          <span class="etapa"><small>Automático</small>Estoque baixa e vira "a receber"</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Financeiro</small>Confirma o recebimento</span>
+        </div>
+
+        <p class="fluxo-titulo">Ordem de serviço até a nota de serviço</p>
+        <div class="fluxo">
+          <span class="etapa"><small>Técnico ou Vend. Externo</small>Cria orçamento/OS</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Ordens de Serviço</small>Valida</span><span class="seta">→</span>
+          <span class="etapa"><small>Técnico</small>Executa e registra</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM</small>Conclui e confirma o recebimento</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM</small>Emite NFS-e</span>
+        </div>
+
+        <p class="fluxo-titulo">Manutenção preventiva</p>
+        <div class="fluxo">
+          <span class="etapa"><small>ADM · Manutenção</small>Cria o plano</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM</small>Libera para o técnico</span><span class="seta">→</span>
+          <span class="etapa"><small>Técnico</small>Vê em "Próximas manutenções"</span><span class="seta">→</span>
+          <span class="etapa"><small>Técnico</small>Atende e registra</span>
+        </div>
+
+        <p class="fluxo-titulo">Cliente novo de campo</p>
+        <div class="fluxo">
+          <span class="etapa"><small>Vendedor Externo</small>Cadastra o cliente</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Clientes</small>Aprova ou rejeita</span><span class="seta">→</span>
+          <span class="etapa"><small>Vendedor Externo</small>Já pode fazer pedidos</span>
+        </div>
+      </section>
+
+      <!-- ======================= DÚVIDAS ======================= -->
+      <section class="perfil" id="duvidas">
+        <h2>Dúvidas e avisos</h2>
+        <p class="quem">Mensagens que aparecem com frequência e o que fazer.</p>
+
+        <div class="tela">
+          <h3>Mensagens do sistema</h3>
+          <div class="tabela">
+            <table>
+              <thead><tr><th>Mensagem</th><th>O que significa</th><th>O que fazer</th></tr></thead>
+              <tbody>
+                <tr><td>Matrícula já existe</td><td>Já há usuário com essa matrícula.</td><td>Use outra matrícula.</td></tr>
+                <tr><td>Já existe cliente com o documento…</td><td>O CPF/CNPJ já está cadastrado.</td><td>Procure o cliente na lista em vez de criar outro.</td></tr>
+                <tr><td>O NCM tem 8 números / O CFOP tem 4 / O CSOSN tem 3</td><td>Dado fiscal do produto com tamanho errado.</td><td>Digite só números, com a quantidade certa.</td></tr>
+                <tr><td>Sem estoque suficiente</td><td>A quantidade pedida passa do que existe.</td><td>Diminua a quantidade ou dê entrada no estoque.</td></tr>
+                <tr><td>Senha deve ter ao menos 6 caracteres</td><td>Senha curta demais.</td><td>Use 6 caracteres ou mais.</td></tr>
+                <tr><td>Nota "Com erro"</td><td>A Receita ou a prefeitura recusou a nota.</td><td>Abra a nota, leia o motivo e corrija o cadastro (documento ou endereço do cliente, dados fiscais do produto).</td></tr>
+                <tr><td>Justificativa com menos de 15 caracteres</td><td>Para cancelar nota é preciso explicar.</td><td>Escreva pelo menos 15 caracteres.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tela">
+          <h3>Limites que você deve conhecer</h3>
+          <ul class="lista">
+            <li>Não existe botão para <strong>excluir</strong> usuário, cliente ou produto. Use <em>Desativar</em> quando for o caso.</li>
+            <li>O Vendedor Interno e os outros perfis <strong>não emitem nota fiscal</strong>: só o ADM Master.</li>
+            <li>As notas emitidas hoje são de <strong>homologação</strong> e não têm valor fiscal.</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer class="fim">Manual do sistema TM Bombas. Os nomes de botões e avisos seguem exatamente o que aparece na tela.</footer>
+    </main>
+  </div>
+</div>
+</body>
+</html>

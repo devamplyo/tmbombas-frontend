@@ -41,6 +41,12 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
+    # Manual de uso (página estática, fora do React). /manual abre o mesmo
+    # arquivo de /manual.html, sem redirecionar.
+    location = /manual {
+        try_files /manual.html =404;
+    }
+
     # SPA: qualquer rota não encontrada cai no index.html (React Router).
     location / {
         try_files $uri $uri/ /index.html;
