@@ -29,9 +29,12 @@ export default function FCOClientePerfilPage() {
       db.ServiceOrder.filter({ client_id: id }, '-created_date'),
     ]);
     let recordCounts = {};
-    if (orders.length) {
-      const counts = await Promise.all(orders.map((o) => listServiceRecords(o.id)));
-      recordCounts = Object.fromEntries(orders.map((o, i) => [o.id, counts[i].length]));
+    // o técnico só lê os registros das próprias OS: o servidor responde 401 nas de outros
+    // técnicos, e o front trata 401 como sessão expirada e desloga
+    const ownOrders = user?.role === 'tecnico' ? orders.filter((o) => o.technician_id === user.id) : orders;
+    if (ownOrders.length) {
+      const counts = await Promise.all(ownOrders.map((o) => listServiceRecords(o.id)));
+      recordCounts = Object.fromEntries(ownOrders.map((o, i) => [o.id, counts[i].length]));
     }
     return { client: clients[0] || null, orders, recordCounts };
   }, [id]);
