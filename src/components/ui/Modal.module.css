@@ -50,6 +50,7 @@
 .body {
   padding: 1.25rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .footer {

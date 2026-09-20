@@ -40,6 +40,7 @@
 .body {
   padding: 1.1rem 1.25rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
@@ -145,6 +146,20 @@
   border-radius: 8px;
   border: 1px solid hsl(var(--border));
 }
+
+.ack {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 0 1.25rem 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid hsl(var(--destructive) / 0.6);
+  background: hsl(var(--destructive) / 0.14);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.ack input { margin-top: 0.2rem; }
 
 .actions {
   display: flex;

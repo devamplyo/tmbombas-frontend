@@ -19,6 +19,7 @@ import {
   Store,
   History,
   CalendarClock,
+  Receipt,
 } from 'lucide-react';
 
 /** Each role points to a module (route prefix) and has its own menu. */
@@ -36,6 +37,7 @@ export const PROFILES = {
       { to: '/admin/estoque', label: 'Estoque', icon: Package },
       { to: '/admin/manutencoes', label: 'Manutenção Preventiva', icon: CalendarClock },
       { to: '/admin/ordens-servico', label: 'Ordens de Serviço', icon: ClipboardList },
+      { to: '/admin/notas-fiscais', label: 'Notas Fiscais', icon: Receipt },
       { to: '/admin/servicos', label: 'Delegação de Serviços', icon: Wrench },
       { to: '/admin/colaboradores', label: 'Colaboradores', icon: UserCog },
       { to: '/admin/vendas-externas', label: 'Vendas Externas', icon: Store },

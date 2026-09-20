@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Send, Pencil } from 'lucide-react';
 import Button from './Button';
+import useScrollLock from '@/hooks/useScrollLock';
 import { brl } from '@/lib/format';
 import styles from './ConfirmSubmit.module.css';
 
 const EMPTY = '—';
+// A fixed list: a `photos = []` default is a new array on every render, which re-runs the thumbnails effect forever.
+const NO_PHOTOS = [];
 
 /**
  * "Confira antes de enviar" screen, shown between the form and the real submit.
@@ -16,6 +19,7 @@ const EMPTY = '—';
  *   total   — number, shown in bold below the items
  *   note    — { label, text } long free text
  *   photos  — File[] shown as thumbnails
+ *   ack     — text of a checkbox the person must tick before confirming (e.g. real fiscal value)
  *
  * Rendered in a portal above everything else, because most forms live inside a Modal.
  * ESC is caught in the capture phase so it closes only this screen, not the form behind it.
@@ -29,7 +33,8 @@ export default function ConfirmSubmit({
   items = [],
   total,
   note,
-  photos = [],
+  photos = NO_PHOTOS,
+  ack,
   saving = false,
   confirmLabel = 'Confirmar e enviar',
   cancelLabel = 'Voltar e corrigir',
@@ -37,6 +42,9 @@ export default function ConfirmSubmit({
   onConfirm,
 }) {
   const dialogRef = useRef(null);
+  useScrollLock(open);
+  const [acked, setAcked] = useState(false);
+  useEffect(() => { if (open) setAcked(false); }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -58,7 +66,7 @@ export default function ConfirmSubmit({
   const [thumbs, setThumbs] = useState([]);
   useEffect(() => {
     if (!open || photos.length === 0) {
-      setThumbs([]);
+      setThumbs((t) => (t.length ? [] : t));
       return undefined;
     }
     const list = photos.map((f) => ({ name: f.name, url: URL.createObjectURL(f) }));
@@ -66,8 +74,9 @@ export default function ConfirmSubmit({
     return () => list.forEach((t) => URL.revokeObjectURL(t.url));
   }, [open, photos]);
 
+  const blocked = saving || (!!ack && !acked);
   const confirm = () => {
-    if (!saving) onConfirm?.();
+    if (!blocked) onConfirm?.();
   };
 
   if (!open) return null;
@@ -141,11 +150,18 @@ export default function ConfirmSubmit({
           )}
         </div>
 
+        {ack && (
+          <label className={styles.ack}>
+            <input type="checkbox" checked={acked} onChange={(e) => setAcked(e.target.checked)} />
+            <span>{ack}</span>
+          </label>
+        )}
+
         <div className={styles.actions}>
           <Button variant="outline" onClick={onCancel} disabled={saving}>
             <Pencil size={16} /> {cancelLabel}
           </Button>
-          <Button onClick={confirm} disabled={saving}>
+          <Button onClick={confirm} disabled={blocked}>
             <Send size={16} /> {saving ? 'Enviando...' : confirmLabel}
           </Button>
         </div>

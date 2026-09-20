@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
+import useScrollLock from '@/hooks/useScrollLock';
 import styles from './Modal.module.css';
 
-/** Centered modal. Closes on ESC and on backdrop click. */
+/** Centered modal. Closes on ESC and on backdrop click; the page behind it does not scroll. */
 export default function Modal({ open, onClose, title, children, footer, width = 520 }) {
+  useScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === 'Escape' && onClose?.();

@@ -14,7 +14,11 @@ import { Input, Select } from '@/components/ui/Field';
 import { CLIENT_STATUS, CLIENT_TYPE } from '@/lib/status';
 import shared from '../shared.module.css';
 
-const EMPTY = { name: '', type: 'pessoa_fisica', document: '', email: '', phone: '', city_name: '', state: '' };
+const EMPTY = {
+  name: '', type: 'pessoa_fisica', document: '', email: '', phone: '',
+  street: '', number: '', complement: '', district: '', city_name: '', state: '', zip_code: '',
+  state_registration: '',
+};
 
 export default function ClientsPage() {
   const toast = useToast();
@@ -43,7 +47,14 @@ export default function ClientsPage() {
   };
 
   const openEdit = (client) => {
-    setForm({ ...EMPTY, ...client });
+    // the address comes as an object; the form edits it field by field
+    const a = client.address || {};
+    setForm({
+      ...EMPTY, ...client,
+      street: a.street || '', number: a.number || '', complement: a.complement || '',
+      district: a.district || '', city_name: a.city || '', state: a.state || '', zip_code: a.zip_code || '',
+      state_registration: client.state_registration || '',
+    });
     setEditingId(client.id);
     setOpen(true);
   };
@@ -54,11 +65,13 @@ export default function ClientsPage() {
     if (!form.name.trim()) return toast.error('Informe o nome do cliente.');
     if (!form.document.trim()) return toast.error('Informe o documento (CPF/CNPJ).');
     try {
+      // `address: undefined` so the flat fields of the form (not the old address object) are what gets saved
+      const payload = { ...form, address: undefined };
       if (editingId) {
-        await db.Client.update(editingId, form);
+        await db.Client.update(editingId, payload);
         toast.success('Cliente atualizado.');
       } else {
-        await db.Client.create({ ...form, validation_status: 'ativo', registered_by_role: 'admin' });
+        await db.Client.create({ ...payload, validation_status: 'ativo', registered_by_role: 'admin' });
         toast.success('Cliente cadastrado.');
       }
       setOpen(false);
@@ -172,8 +185,17 @@ export default function ClientsPage() {
           <Input label="Documento (CPF/CNPJ)*" value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} />
           <Input label="E-mail" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <Input label="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <Input label="Rua" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
+          <Input label="Número" value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} />
+          <Input label="Complemento" value={form.complement} onChange={(e) => setForm({ ...form, complement: e.target.value })} />
+          <Input label="Bairro" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
           <Input label="Cidade" value={form.city_name} onChange={(e) => setForm({ ...form, city_name: e.target.value })} />
-          <Input label="UF" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+          <Input label="UF" maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })} />
+          <Input label="CEP" inputMode="numeric" value={form.zip_code} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} />
+          <div style={{ gridColumn: '1 / -1' }}>
+            <Input label="Inscrição estadual (só empresa contribuinte de ICMS)" value={form.state_registration}
+              onChange={(e) => setForm({ ...form, state_registration: e.target.value })} placeholder="Deixe em branco se não tiver" />
+          </div>
         </div>
       </Modal>
 
