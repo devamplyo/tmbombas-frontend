@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { ShoppingCart, Search, Trash2, Plus, Minus, CheckCircle, FileText } from 'lucide-react';
+import { ShoppingCart, Search, Trash2, Plus, Minus, CheckCircle } from 'lucide-react';
 import { db } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
@@ -11,7 +11,6 @@ import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import { Input, Select } from '@/components/ui/Field';
 import { brl } from '@/lib/format';
-import { generateFakeSaleNfePdf } from '@/lib/fakeNfePdf';
 import styles from './PDVPage.module.css';
 import shared from '../shared.module.css';
 
@@ -208,13 +207,9 @@ export default function PDVPage() {
                 <span>Total</span><span>{brl(lastSale.total)}</span>
               </div>
             </div>
-            <div style={{ background: 'hsl(var(--warning) / 0.15)', border: '1px solid hsl(var(--warning))', borderRadius: 'var(--radius)', padding: '0.6rem 0.75rem', fontSize: '0.78rem' }}>
-              <strong>SIMULAÇÃO</strong> — o PDF abaixo é só uma prévia visual da futura Nota Fiscal de
-              Venda, sem valor fiscal. Nenhuma nota é emitida de verdade.
-            </div>
-            <Button variant="outline" onClick={() => generateFakeSaleNfePdf(lastSale)}>
-              <FileText size={16} /> Emitir Nota Fiscal de Venda (simulação)
-            </Button>
+            <p style={{ fontSize: '0.82rem', color: 'hsl(var(--muted-foreground))', margin: 0 }}>
+              A nota fiscal desta venda é emitida pelo ADM Master, em Notas Fiscais.
+            </p>
           </div>
         )}
       </Modal>
