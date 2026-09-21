@@ -302,7 +302,7 @@
             <li><span>Abra <strong>tmbombas.online</strong> no navegador. Funciona no computador, no tablet e no celular.</span></li>
             <li><span>Digite a sua <span class="campo">Matrícula</span> e a sua <span class="campo">Senha</span>.</span></li>
             <li><span>Clique em <span class="b">Entrar</span>.</span></li>
-            <li><span>Na tela <strong>Selecione seu perfil de acesso</strong>, clique em <span class="b">Acessar</span> no seu perfil.</span></li>
+            <li><span>Na tela <strong>Selecione seu perfil de acesso</strong>, clique em <span class="b">Acessar</span> no cartão do seu perfil (ele traz a etiqueta <em>Seu perfil</em>). Os cartões dos outros perfis ficam apagados. Só o <strong>ADM Master</strong> vê os quatro liberados e pode entrar em qualquer um.</span></li>
           </ol>
           <p>A matrícula e a senha são criadas pelo ADM Master. Se esquecer a senha, peça a ele para trocar (veja <a href="#adm-usuarios">Usuários</a>).</p>
           <div class="aviso">
@@ -316,6 +316,7 @@
           <ul class="lista">
             <li>No <strong>computador</strong>, o menu fica sempre à esquerda.</li>
             <li>No <strong>celular</strong> e no tablet, o menu abre pelo botão de três traços no canto de cima.</li>
+            <li>No canto do menu ficam o seu nome e dois botões: <span class="b">Trocar</span> volta à escolha de perfil (útil para o ADM Master) e <span class="b">Sair</span> encerra a sessão.</li>
             <li>Quando você salva, apaga ou envia algo, aparece um aviso rápido na tela ("Cliente cadastrado.", "Produto atualizado." e assim por diante). Aviso vermelho quer dizer que <strong>não gravou</strong>: leia o texto, corrija e tente de novo.</li>
             <li>Campos com <strong>*</strong> (asterisco) são obrigatórios.</li>
             <li>Nas janelas que se abrem por cima da tela, a tecla <strong>Esc</strong> ou o <strong>X</strong> fecham sem salvar.</li>
@@ -323,7 +324,7 @@
         </div>
 
         <div class="tela" id="quem-faz-o-que">
-          <h3>Quem faz o quê</h3>
+          <h3>Quem faz o quê (no perfil de cada um)</h3>
           <div class="tabela">
             <table>
               <thead><tr><th>Tarefa</th><th>ADM Master</th><th>Vendedor Interno</th><th>Vendedor Externo</th><th>Funcionário Condominial</th></tr></thead>
@@ -332,15 +333,20 @@
                 <tr><td>Enviar pedido de venda externa</td><td class="nao">—</td><td class="nao">—</td><td class="sim">Sim</td><td class="nao">—</td></tr>
                 <tr><td>Aprovar (faturar) pedido externo</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
                 <tr><td>Cadastrar cliente</td><td class="sim">Sim (direto)</td><td class="nao">—</td><td class="sim">Sim (o ADM aprova)</td><td class="nao">—</td></tr>
-                <tr><td>Cadastrar produto e dar entrada no estoque</td><td class="sim">Sim</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Cadastrar produto</td><td class="sim">Sim</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Dar entrada de lote e cadastrar fornecedor</td><td class="nao">—</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td></tr>
                 <tr><td>Criar orçamento ou OS</td><td class="nao">—</td><td class="nao">—</td><td class="sim">Orçamento</td><td class="sim">Sim</td></tr>
                 <tr><td>Validar ou recusar orçamento e OS</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
                 <tr><td>Registrar atendimento com fotos</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td><td class="sim">Sim</td></tr>
-                <tr><td>Cancelar venda finalizada</td><td class="sim">Sim</td><td class="sim">Só com a senha do ADM</td><td class="nao">—</td><td class="nao">—</td></tr>
+                <tr><td>Cancelar venda finalizada (só as de hoje)</td><td class="nao">—</td><td class="sim">Só digitando matrícula e senha do ADM</td><td class="nao">—</td><td class="nao">—</td></tr>
                 <tr><td>Emitir e cancelar nota fiscal</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
                 <tr><td>Criar usuários e trocar senhas</td><td class="sim">Sim</td><td class="nao">—</td><td class="nao">—</td><td class="nao">—</td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="aviso">
+            <strong class="t">O ADM Master entra em todos os perfis</strong>
+            <p>A tabela mostra o que cada perfil faz na sua própria área. O ADM Master também pode entrar (pelo botão <span class="b">Trocar</span>) nos perfis Vendedor Interno, Vendedor Externo e Funcionário Condominial e usar as telas deles. Por isso, por exemplo, a entrada de lote no estoque é feita por ele dentro do perfil Vendedor Interno.</p>
           </div>
         </div>
       </section>
@@ -361,36 +367,46 @@
           </ul>
         </div>
 
-        <div class="tela" id="adm-financeiro">
+                <div class="tela" id="adm-financeiro">
           <span class="menu-tag">Menu · Financeiro</span>
           <h3>Financeiro (Visão Financeira)</h3>
           <p>Entradas, saídas e valores a receber.</p>
           <dl class="termos">
-            <dt>Receita (vendas)</dt><dd>Dinheiro das vendas.</dd>
-            <dt>Gastos (entradas estoque)</dt><dd>Quanto foi gasto comprando produtos para o estoque.</dd>
+            <dt>Receita (vendas)</dt><dd>Soma das vendas.</dd>
+            <dt>Gastos (entradas estoque)</dt><dd>Quanto foi gasto comprando produtos para o estoque (as entradas de lote).</dd>
             <dt>Saldo</dt><dd>Receita menos gastos.</dd>
-            <dt>A receber</dt><dd>Serviços concluídos que ainda não foram pagos.</dd>
+            <dt>A receber</dt><dd>Valores que ainda não foram pagos. Hoje são os serviços concluídos.</dd>
           </dl>
-          <p>Mais abaixo: o gráfico <strong>Entradas x Saídas por período</strong> (Dia, Semana ou Mês), <strong>Gastos por fornecedor</strong> e <strong>Últimas entradas de estoque</strong>.</p>
+          <p>Mais abaixo: o gráfico <strong>Entradas x Saídas por período</strong> (botões <span class="b">Dia</span>, <span class="b">Semana</span> e <span class="b">Mês</span>), <strong>Gastos por fornecedor</strong> (com os seus próprios botões Dia, Semana e Mês) e <strong>Últimas entradas de estoque</strong>.</p>
           <h3 style="font-size:1.05rem;margin-top:14px">Confirmar que o cliente pagou</h3>
           <ol class="passos">
-            <li><span>Na lista <strong>A receber — Ordens de Serviço concluídas</strong>, ache o serviço.</span></li>
-            <li><span>Clique em <span class="b">Confirmar</span>. Aparece "Recebimento confirmado."</span></li>
+            <li><span>Na lista <strong>A receber — Ordens de Serviço concluídas</strong> (colunas Cliente, Descrição, Valor e Status), ache o serviço com status <em>A receber</em>.</span></li>
+            <li><span>Clique em <span class="b">Confirmar</span> na linha. Aparece "Recebimento confirmado."</span></li>
           </ol>
+          <div class="aviso">
+            <strong class="t">O que entra nesta lista</strong>
+            <p>Só os <strong>serviços concluídos</strong> ficam esperando a sua confirmação. Vendas do balcão (PDV) e pedidos externos faturados já entram como recebidos e não aparecem aqui para confirmar.</p>
+          </div>
         </div>
 
-        <div class="tela" id="adm-clientes">
+                <div class="tela" id="adm-clientes">
           <span class="menu-tag">Menu · Clientes</span>
           <h3>Clientes</h3>
+          <p>A lista mostra o nome, o tipo e a cidade de cada cliente, com o status (<em>Ativo</em>, <em>Aguardando validação</em> ou <em>Rejeitado</em>) e o aviso <em>Manutenção vencida</em> quando o plano de manutenção está atrasado.</p>
           <h3 style="font-size:1.05rem;margin-top:10px">Cadastrar um cliente</h3>
           <ol class="passos">
             <li><span>Clique em <span class="b">Novo cliente</span>.</span></li>
-            <li><span>Preencha <span class="campo">Nome</span>, <span class="campo">Tipo</span> (pessoa física ou jurídica) e <span class="campo">Documento (CPF/CNPJ)*</span>. Preencha também e-mail, telefone e o endereço completo (Rua, Número, Bairro, Cidade, UF e CEP).</span></li>
+            <li><span>Preencha <span class="campo">Nome</span>, <span class="campo">Tipo</span> (<em>Condomínio</em>, <em>Pessoa Física</em> ou <em>Pessoa Jurídica</em>) e <span class="campo">Documento (CPF/CNPJ)*</span>. Preencha também e-mail, telefone e o endereço (Rua, Número, Complemento, Bairro, Cidade, UF e CEP).</span></li>
             <li><span>Se for empresa que paga ICMS, preencha a <span class="campo">Inscrição estadual</span>. Se não tiver, deixe em branco.</span></li>
             <li><span>Clique em <span class="b">Salvar</span>. Aparece "Cliente cadastrado."</span></li>
           </ol>
           <p><strong>Editar:</strong> use a busca (<em>Buscar por nome ou documento…</em>), clique no cliente, mude o que precisar e salve. Aparece "Cliente atualizado."</p>
-          <p><strong>Clientes cadastrados pelo Vendedor Externo</strong> chegam como <em>Aguardando validação</em>. Clique em <span class="b">Aprovar</span> para liberar, ou em <span class="b">Rejeitar</span> e escreva o motivo (obrigatório).</p>
+          <h3 style="font-size:1.05rem;margin-top:10px">Aprovar ou rejeitar um cliente novo</h3>
+          <p>Clientes cadastrados pelo Vendedor Externo chegam com o status <em>Aguardando validação</em> e, na linha deles, aparecem dois botões:</p>
+          <ol class="passos">
+            <li><span><span class="b">Aprovar</span> libera o cliente na hora. Aparece "Cliente aprovado."</span></li>
+            <li><span>O botão <strong>X</strong> (só o ícone, ao lado de Aprovar) rejeita: abre a janela <strong>Rejeitar cliente</strong>. Escreva o <span class="campo">Motivo da rejeição*</span> e clique em <span class="b">Confirmar rejeição</span>. (<span class="b">Fechar</span> desiste.) Aparece "Cliente rejeitado."</span></li>
+          </ol>
           <div class="aviso">
             <strong class="t">Importante para nota fiscal</strong>
             <p>CPF/CNPJ e endereço corretos são necessários para emitir nota. A nota de serviço é recusada se o CNPJ do cliente for inválido.</p>
@@ -398,58 +414,62 @@
           <p>O sistema não tem botão para excluir cliente.</p>
         </div>
 
-        <div class="tela" id="adm-estoque">
+                <div class="tela" id="adm-estoque">
           <span class="menu-tag">Menu · Estoque</span>
           <h3>Estoque</h3>
           <p>Três abas: <span class="b">Todos os Produtos</span>, <span class="b">Estoque Baixo</span> e <span class="b">Histórico de Saídas</span>. No topo: <strong>Total de Produtos</strong> e <strong>Valor Imobilizado</strong>.</p>
           <h3 style="font-size:1.05rem;margin-top:10px">Cadastrar um produto</h3>
           <ol class="passos">
             <li><span>Clique em <span class="b">Novo produto</span>.</span></li>
-            <li><span>Obrigatórios: <span class="campo">Nome*</span>, <span class="campo">SKU*</span>, <span class="campo">Código de barras*</span> e <span class="campo">Fabricante*</span>. O SKU e o código de barras não podem se repetir.</span></li>
-            <li><span>Escolha a <span class="campo">Categoria</span> (Bomba, Filtro, Motor, Peça de reposição, Acessório ou Produto químico) e preencha <span class="campo">Preço de venda</span>, <span class="campo">Qtd. em estoque</span>, <span class="campo">Estoque mínimo</span> e <span class="campo">Unidade</span>.</span></li>
-            <li><span>Preencha os <strong>dados fiscais</strong>: <span class="campo">NCM</span> (8 números), <span class="campo">CFOP</span> (4 números, ex.: 5102), <span class="campo">CSOSN</span> (3 números, ex.: 102) e <span class="campo">Origem da mercadoria</span>.</span></li>
+            <li><span>Obrigatórios: <span class="campo">Nome*</span>, <span class="campo">SKU*</span>, <span class="campo">Código de barras*</span> e <span class="campo">Fabricante*</span>. O SKU não pode se repetir.</span></li>
+            <li><span>Escolha a <span class="campo">Categoria</span> (Bomba, Filtro, Motor, Peça de reposição, Acessório ou Produto químico) e preencha <span class="campo">Unidade</span>, <span class="campo">Preço de venda (R$)</span>, <span class="campo">Qtd. em estoque</span> e <span class="campo">Estoque mínimo</span>.</span></li>
+            <li><span>Na parte <strong>Dados fiscais (nota fiscal)</strong>, preencha <span class="campo">NCM</span> (8 números), <span class="campo">CFOP</span> (4 números, ex.: 5102), <span class="campo">CSOSN</span> (3 números, ex.: 102) e a <span class="campo">Origem da mercadoria</span>. Quem define os códigos certos é a contadora.</span></li>
             <li><span>Clique em <span class="b">Salvar</span>.</span></li>
           </ol>
           <div class="aviso atencao">
-            <strong class="t">Selo "Sem código fiscal"</strong>
-            <p>Produto sem NCM mostra esse selo amarelo na lista. Ele vende normalmente, mas <strong>a nota fiscal dele não sai</strong> enquanto os dados fiscais não forem preenchidos.</p>
+            <strong class="t">Dados fiscais em branco</strong>
+            <p>Eles são opcionais para cadastrar. Se ficarem em branco, a nota usa os <strong>códigos padrão da empresa, que servem só para teste</strong>. O produto mostra o selo amarelo <em>Sem código fiscal</em> na lista. Antes de emitir notas de verdade, peça os códigos à contadora e preencha todos os produtos.</p>
           </div>
           <p><strong>Editar:</strong> clique no produto, mude e salve. <strong>Desativar/Ativar:</strong> botão na linha do produto. Produto desativado deixa de ser vendido, mas continua no histórico. Não existe botão de excluir produto.</p>
         </div>
 
-        <div class="tela" id="adm-manutencao">
+                <div class="tela" id="adm-manutencao">
           <span class="menu-tag">Menu · Manutenção Preventiva</span>
           <h3>Manutenção Preventiva</h3>
-          <p>Planos de manutenção que se repetem, por cliente (por exemplo, revisar a bomba de um condomínio a cada 90 dias).</p>
+          <p>Planos de manutenção que se repetem, por cliente (por exemplo, revisar a bomba de um condomínio a cada 90 dias). A lista mostra Cliente, Descrição, Frequência, Próxima data, a contagem de dias e se o plano está <em>Liberado</em> para um técnico.</p>
           <ol class="passos">
             <li><span>Clique em <span class="b">Novo plano</span>.</span></li>
-            <li><span>Escolha o <span class="campo">Cliente*</span> e o <span class="campo">Técnico*</span>, informe a <span class="campo">Frequência (dias)*</span> e, se quiser, a descrição e a <span class="campo">Última manutenção</span>.</span></li>
+            <li><span>Escolha o <span class="campo">Cliente*</span> e o <span class="campo">Técnico responsável*</span>, informe a <span class="campo">Frequência (dias)*</span> e, se quiser, a <span class="campo">Descrição</span> e a <span class="campo">Última manutenção (opcional)</span>.</span></li>
             <li><span>Salve. Aparece "Plano de manutenção criado."</span></li>
-            <li><span>Quando chegar a hora, clique em <span class="b">Liberar</span> no plano e escolha o <span class="campo">Técnico responsável*</span>. Aparece "Manutenção liberada pro técnico." e ela surge no painel do técnico em <em>Próximas manutenções</em>.</span></li>
+            <li><span>Para avisar o técnico, clique em <span class="b">Liberar</span> na linha do plano (se já foi liberado, o botão é <span class="b">Trocar técnico</span>). Na janela <strong>Liberar manutenção</strong>, escolha o <span class="campo">Técnico*</span> e clique em <span class="b">Liberar</span>. Aparece "Manutenção liberada pro técnico."</span></li>
           </ol>
+          <div class="aviso atencao">
+            <strong class="t">O que o técnico vê</strong>
+            <p>A manutenção liberada aparece para o técnico só como <strong>lembrete</strong>, na tabela <em>Próximas manutenções</em> do Dashboard dele (Cliente, Descrição, Data prevista e contagem de dias). Não existe uma tela para marcar que a manutenção foi feita, e por isso a <em>Próxima data</em> do plano não muda sozinha. Para mandar o técnico ao local, use a <a href="#adm-delegacao">Delegação de Serviços</a>.</p>
+          </div>
         </div>
 
-        <div class="tela" id="adm-os">
+                <div class="tela" id="adm-os">
           <span class="menu-tag">Menu · Ordens de Serviço</span>
           <h3>Ordens de Serviço</h3>
-          <p>Aqui você valida e acompanha os orçamentos e as OS criados pelos técnicos e pelos vendedores externos. Quatro abas: <span class="b">Aguardando</span>, <span class="b">Validadas</span>, <span class="b">Recusadas</span> e <span class="b">Concluídas</span>.</p>
+          <p>Aqui você valida e acompanha os orçamentos e as OS criados pelos técnicos e pelos vendedores externos. Quatro abas: <span class="b">Aguardando</span>, <span class="b">Validadas</span> (validadas e em execução), <span class="b">Recusadas</span> (não validadas e canceladas) e <span class="b">Concluídas</span>.</p>
           <div class="fluxo" aria-label="Caminho de uma OS">
             <span class="etapa"><small>Criada</small>Aguardando validação</span><span class="seta">→</span>
             <span class="etapa"><small>Você decide</small>Validada</span><span class="seta">→</span>
-            <span class="etapa"><small>Técnico atende</small>Em execução</span><span class="seta">→</span>
-            <span class="etapa"><small>Fim</small>Concluída</span>
+            <span class="etapa"><small>Técnico inicia</small>Em execução</span><span class="seta">→</span>
+            <span class="etapa"><small>Técnico finaliza</small>Concluída</span>
           </div>
-          <p>Em qualquer ponto antes de validar você pode recusar (<em>Não validada</em>), e uma OS em execução pode ser <em>Cancelada</em>.</p>
+          <p>Na aba <strong>Aguardando</strong> você pode recusar (<em>Não validada</em>). Uma OS em execução pode ser <em>Cancelada</em>.</p>
           <ol class="passos">
-            <li><span>Na aba <strong>Aguardando</strong>, clique em <span class="b">Detalhes</span> para ler o pedido.</span></li>
-            <li><span>Clique em <span class="b">Validar</span> para aprovar ou em <span class="b">Recusar</span> para negar. Aparece "Status atualizado."</span></li>
-            <li><span>Depois, no <strong>Detalhes</strong> da OS, use os botões de status para avançar: <em>Em execução</em>, depois <em>Concluída</em> (ou <em>Cancelada</em>).</span></li>
-            <li><span>Com a OS concluída e o cliente tendo pago, clique em <span class="b">Confirmar recebimento</span>.</span></li>
-            <li><span>Para emitir a nota de serviço, use o bloco <strong>Nota Fiscal de Serviço</strong> no mesmo Detalhes (<span class="b">Emitir NFS-e</span>). O status atualiza sozinho, a cada 2 segundos, sem precisar recarregar.</span></li>
+            <li><span>Na aba <strong>Aguardando</strong>, clique em <span class="b">Detalhes</span> para ler o pedido (tipo, valor e descrição).</span></li>
+            <li><span>Clique em <span class="b">Validar</span> para aprovar ou em <span class="b">Recusar</span> para negar. Aparece "Status atualizado." Os mesmos botões existem dentro do Detalhes, em <strong>Alterar status</strong>.</span></li>
+            <li><span>Depois de validada, o <strong>técnico</strong> inicia a OS (<em>Em execução</em>) e finaliza pela tela dele. <strong>Quando ele finaliza, a OS vira Concluída sozinha</strong> e o valor entra em <em>A receber</em> no Financeiro. Se precisar, você também pode mudar o status no Detalhes: <em>Em execução</em>, depois <em>Concluída</em> ou <em>Cancelada</em>.</span></li>
+            <li><span>Com a OS concluída e o cliente tendo pago, abra o <span class="b">Detalhes</span> na aba <strong>Concluídas</strong> e clique em <span class="b">Confirmar recebimento</span>. (Também dá para confirmar no <a href="#adm-financeiro">Financeiro</a>.)</span></li>
+            <li><span>Para emitir a nota de serviço, use, no mesmo Detalhes, o bloco <strong>Nota Fiscal de Serviço (NFS-e)</strong> e o botão <span class="b">Emitir NFS-e</span>. O status atualiza sozinho, a cada 2 segundos, sem precisar recarregar.</span></li>
           </ol>
         </div>
 
-        <div class="tela" id="adm-notas">
+                <div class="tela" id="adm-notas">
           <span class="menu-tag">Menu · Notas Fiscais</span>
           <h3>Notas Fiscais</h3>
           <p>Aqui saem as notas de <strong>venda (NF-e)</strong> e de <strong>serviço (NFS-e)</strong>. É uma tela só do ADM Master.</p>
@@ -460,7 +480,8 @@
 
           <h3 style="font-size:1.05rem;margin-top:12px">A tela, de cima para baixo</h3>
           <dl class="termos">
-            <dt>Cartões de status</dt><dd><strong>Autorizadas</strong>, <strong>Processando</strong>, <strong>Com erro</strong> e <strong>Canceladas</strong>. Clicar num deles filtra a tabela lá embaixo.</dd>
+            <dt>Emitir nota</dt><dd>Botão no topo. Leva até a lista <em>Aguardando nota</em>.</dd>
+            <dt>Cartões de status</dt><dd><strong>Autorizadas</strong>, <strong>Processando</strong>, <strong>Com erro</strong> e <strong>Canceladas</strong>, cada um com a quantidade. Clicar num deles filtra a tabela lá embaixo.</dd>
             <dt>Aguardando nota</dt><dd>Vendas e serviços que ainda não têm nota, em cartões. Abas <em>Todas</em>, <em>Vendas · NF-e</em> e <em>Serviços · NFS-e</em>, com busca. Cada cartão mostra os 3 primeiros itens; <span class="b">Ver todos os N itens</span> abre a lista completa numa janela.</dd>
             <dt>Notas emitidas</dt><dd>Tabela com todas as notas, com filtro próprio (tipo, busca e status). O filtro de cima e o de baixo são independentes.</dd>
           </dl>
@@ -468,53 +489,59 @@
           <h3 style="font-size:1.05rem;margin-top:12px">Emitir NF-e (nota de uma venda)</h3>
           <ol class="passos">
             <li><span>No cartão da venda em <strong>Aguardando nota</strong>, clique em <span class="b">Emitir NF-e</span>.</span></li>
-            <li><span>Na janela <strong>Quem recebe a NF-e?</strong>, escolha um <em>cliente cadastrado</em> ou <span class="b">Digitar os dados</span> (Nome, CPF ou CNPJ e endereço).</span></li>
-            <li><span>Na tela <strong>Confira a NF-e</strong>, revise itens e valor e clique em <span class="b">Emitir NF-e</span>.</span></li>
+            <li><span>Abre a janela <strong>Quem recebe a NF-e?</strong>, com a venda e o valor. Escolha a aba <span class="b">Cliente cadastrado</span> (e selecione o cliente em <span class="campo">Cliente</span>) ou <span class="b">Digitar os dados</span> (Nome, CPF ou CNPJ e endereço, com CPF/CNPJ válido). Clique em <span class="b">Continuar</span>.</span></li>
+            <li><span>Na janela <strong>Confira a NF-e antes de emitir</strong>, revise cliente, itens e valor e clique em <span class="b">Emitir NF-e</span>. (<span class="b">Voltar e corrigir</span> retorna.)</span></li>
             <li><span>A nota abre em <strong>Andamento</strong>: primeiro "Processando", depois "Autorizada". Não precisa recarregar.</span></li>
           </ol>
-          <p>Todos os produtos da venda precisam ter os dados fiscais (NCM, CFOP e CSOSN). Se faltar, o sistema avisa antes de enviar.</p>
+          <p>Os dados fiscais dos produtos (NCM, CFOP, CSOSN) não bloqueiam a emissão: se estiverem em branco, a nota usa os códigos padrão de teste da empresa (veja <a href="#adm-estoque">Estoque</a>).</p>
 
           <h3 style="font-size:1.05rem;margin-top:12px">Emitir NFS-e (nota de um serviço)</h3>
           <ol class="passos">
-            <li><span>No cartão da OS concluída, clique em <span class="b">Emitir NFS-e</span>. (Também dá para emitir dentro da OS, em Ordens de Serviço.)</span></li>
-            <li><span>Confira e clique em <span class="b">Emitir NFS-e</span>.</span></li>
+            <li><span>No cartão da OS concluída, clique em <span class="b">Emitir NFS-e</span>. (Também dá para emitir dentro da OS, em <a href="#adm-os">Ordens de Serviço</a>.)</span></li>
+            <li><span>Abre direto a janela <strong>Confira a NFS-e antes de emitir</strong>, com cliente, documento, origem (a OS), ambiente e o serviço. Confira e clique em <span class="b">Emitir NFS-e</span>.</span></li>
           </ol>
-          <p>O cliente da OS precisa ter <strong>CNPJ/CPF válido</strong> e endereço. Com CNPJ inválido a prefeitura recusa e a nota fica <em>Com erro</em>.</p>
+          <p>O cliente da OS precisa ter um <strong>CNPJ/CPF válido</strong>. Com o documento inválido a prefeitura recusa e a nota fica <em>Com erro</em>.</p>
 
           <h3 style="font-size:1.05rem;margin-top:12px">Depois de emitida</h3>
+          <p>Clique na linha da nota na tabela. O detalhe mostra o cliente, os itens, a <strong>chave de acesso</strong> (botão <span class="b">Copiar</span>), o protocolo e o <strong>Andamento</strong>.</p>
           <ul class="lista">
-            <li><strong>Ver a nota:</strong> clique na linha na tabela. Abre o detalhe com a chave de acesso, os itens e o andamento.</li>
-            <li><strong>Baixar:</strong> no detalhe, <span class="b">Baixar DANFE</span> (PDF) e <span class="b">XML</span>.</li>
-            <li><strong>Cancelar:</strong> no detalhe, clique em <span class="b">Cancelar nota</span> e escreva a justificativa. Ela precisa ter <strong>pelo menos 15 caracteres</strong>. Há prazo legal para cancelar em produção. Uma venda com nota cancelada volta para <em>Aguardando nota</em>.</li>
-            <li><strong>Com erro:</strong> abra a nota e leia o motivo que a Receita ou a prefeitura devolveu. Corrija o cadastro indicado (por exemplo, o CNPJ do cliente).</li>
+            <li><strong>Baixar:</strong> <span class="b">Baixar DANFE (PDF)</span> na NF-e ou <span class="b">Baixar DANFSe (PDF)</span> na NFS-e, e <span class="b">Baixar XML</span>. Aparecem quando a nota está Autorizada ou Cancelada.</li>
+            <li><strong>Processando:</strong> se demorar, use <span class="b">Atualizar status</span>.</li>
+            <li><strong>Cancelar:</strong> só notas <em>Autorizadas</em> têm o botão <span class="b">Cancelar nota</span>. Ele abre a janela <strong>Cancelar nota</strong>: escreva o <span class="campo">Motivo do cancelamento</span> (mínimo de <strong>15 caracteres</strong>; o botão só libera quando chega nisso) e clique em <span class="b">Cancelar nota</span>. O prazo costuma ser de 24 horas depois da emissão na NF-e, e depende do município na NFS-e. Uma venda com nota cancelada volta para <em>Aguardando nota</em>.</li>
+            <li><strong>Com erro:</strong> abra a nota e leia o motivo devolvido. Corrija o cadastro indicado (por exemplo, o CNPJ do cliente) e clique em <span class="b">Corrigir e emitir de novo</span>.</li>
           </ul>
         </div>
 
         <div class="tela" id="adm-delegacao">
           <span class="menu-tag">Menu · Delegação de Serviços</span>
           <h3>Delegação de Serviços</h3>
-          <p>Marcar uma tarefa para um técnico. Ela aparece na agenda dele.</p>
+          <p>Marcar uma tarefa para um técnico (a lista de colaboradores mostra só técnicos). Ela aparece na agenda dele.</p>
           <ol class="passos">
             <li><span>Em <strong>Nova Tarefa</strong>, escolha o <span class="campo">Colaborador*</span> e a <span class="campo">Data*</span>.</span></li>
-            <li><span>Se quiser, informe <span class="campo">Horário</span>, <span class="campo">Cliente</span> e a <span class="campo">OS vinculada</span>.</span></li>
+            <li><span>Se quiser, informe <span class="campo">Horário</span>, <span class="campo">Cliente</span> e a <span class="campo">OS vinculada (opcional)</span>. <strong>Vincule a OS</strong> quando o técnico precisar registrar fotos e anotações do atendimento: sem OS vinculada ele só consegue iniciar e finalizar a tarefa.</span></li>
             <li><span>Escreva a <span class="campo">Descrição*</span> do que deve ser feito.</span></li>
             <li><span>Clique em <span class="b">Agendar Tarefa</span>. Aparece "Tarefa delegada." e ela entra em <strong>Tarefas Recentes</strong>.</span></li>
           </ol>
         </div>
 
-        <div class="tela" id="adm-colaboradores">
+                <div class="tela" id="adm-colaboradores">
           <span class="menu-tag">Menu · Colaboradores</span>
           <h3>Colaboradores</h3>
-          <p>Acompanhe o trabalho de cada funcionário. Use a busca (<em>nome ou matrícula</em>) e clique na pessoa. O perfil mostra <strong>Ordens de Serviço</strong>, <strong>Concluídas</strong>, <strong>Vendas</strong> e <strong>Receita gerada</strong>, com filtro por período (<span class="campo">De</span> e <span class="campo">Até</span>) e por <span class="campo">Status</span>, além do histórico de OS e de vendas. <span class="b">Voltar</span> retorna à lista.</p>
+          <p>Acompanhe o trabalho de cada funcionário. Use a busca (<em>nome ou matrícula</em>) e clique na pessoa. Cada cartão mostra a matrícula, o perfil e se está <em>Ativo</em>.</p>
+          <ul class="lista">
+            <li><strong>Vendedores:</strong> o perfil mostra <strong>Vendas</strong>, <strong>Receita gerada</strong> e o <strong>Histórico de vendas</strong>.</li>
+            <li><strong>Técnicos:</strong> o perfil mostra <strong>Ordens de Serviço</strong> e <strong>Concluídas</strong> e o <strong>Histórico de Ordens de Serviço</strong>, com filtro de <span class="campo">Status</span>.</li>
+            <li>Nos dois há filtro por período (<span class="campo">De</span> e <span class="campo">Até</span>). <span class="b">Voltar</span> retorna à lista.</li>
+          </ul>
         </div>
 
-        <div class="tela" id="adm-externas">
+                <div class="tela" id="adm-externas">
           <span class="menu-tag">Menu · Vendas Externas</span>
           <h3>Vendas Externas</h3>
-          <p>Pedidos que os vendedores externos enviaram. Abas <span class="b">Reservas</span> e <span class="b">Produtividade</span>, com período de 7, 30, 90 dias ou tudo.</p>
+          <p>Pedidos que os vendedores externos enviaram. Abas <span class="b">Reservas</span> (com a quantidade de pedidos) e <span class="b">Produtividade</span> (pedidos e valor por vendedor), com período de 7, 30, 90 dias ou tudo.</p>
           <ol class="passos">
-            <li><span>Leia o pedido na aba <strong>Reservas</strong>.</span></li>
-            <li><span>Para aprovar, clique em <span class="b">Faturar Pedido</span>. O sistema baixa o estoque e cria a conta a receber. Aparece "Pedido faturado — estoque baixado e conta a receber gerada."</span></li>
+            <li><span>Na aba <strong>Reservas</strong>, leia o pedido: cliente, vendedor, itens, total e forma de pagamento escolhida.</span></li>
+            <li><span>Para aprovar, clique em <span class="b">Faturar Pedido</span>. O pedido vira uma venda: o <strong>estoque baixa</strong> e a venda entra no Financeiro <strong>já como recebida</strong> (não fica em <em>A receber</em>). Aparece "Pedido faturado — estoque baixado e conta a receber gerada." Se faltar estoque, o sistema recusa. Depois a venda aparece em <em>Aguardando nota</em>.</span></li>
             <li><span>Para negar, clique em <span class="b">Recusar</span>, escreva o <span class="campo">Motivo da recusa*</span> (por exemplo, "produto sem estoque suficiente") e confirme em <span class="b">Recusar pedido</span>. O vendedor vê o motivo.</span></li>
           </ol>
         </div>
@@ -560,49 +587,45 @@
           <p>Resumo do seu dia: <strong>Vendas hoje</strong>, <strong>Receita hoje</strong>, <strong>Produtos ativos</strong> e <strong>Estoque baixo</strong>.</p>
         </div>
 
-        <div class="tela" id="vi-pdv">
+                <div class="tela" id="vi-pdv">
           <span class="menu-tag">Menu · PDV / Vendas</span>
           <h3>PDV: fazer uma venda</h3>
           <ol class="passos">
-            <li><span>Procure o produto em <em>Buscar por nome, código de barras ou SKU…</em>.</span></li>
-            <li><span>Clique no produto para colocá-lo no carrinho. No carrinho, use <strong>+</strong> e <strong>−</strong> para mudar a quantidade ou remova o item.</span></li>
-            <li><span>Se quiser, escreva o <span class="campo">Nome do cliente (opcional)</span>.</span></li>
-            <li><span>Escolha a <span class="campo">Forma de pagamento</span>: Dinheiro, PIX, Cartão de Crédito ou Cartão de Débito.</span></li>
-            <li><span>Clique em <span class="b">Finalizar venda</span> e, na janela <strong>Confirmar venda</strong>, em <span class="b">Confirmar</span>. (<span class="b">Voltar</span> retorna ao carrinho.)</span></li>
+            <li><span>Procure o produto em <em>Buscar por nome, código de barras ou SKU…</em>. Cada produto mostra o preço e quantos estão <em>Disponível</em>. Produto sem estoque aparece como <em>Sem estoque</em> e não entra no carrinho.</span></li>
+            <li><span>Clique no produto para colocá-lo no <strong>Carrinho</strong>. No carrinho, use <strong>+</strong> e <strong>−</strong> para mudar a quantidade ou remova o item.</span></li>
+            <li><span>Clique em <span class="b">Finalizar venda</span>. Abre a janela <strong>Confirmar venda</strong>.</span></li>
+            <li><span>Nessa janela, se quiser, escreva o <span class="campo">Nome do cliente (opcional)</span> e escolha a <span class="campo">Forma de pagamento</span>: Dinheiro, PIX, Cartão de Crédito, Cartão de Débito ou Boleto. Confira os itens e o total.</span></li>
+            <li><span>Clique em <span class="b">Confirmar</span>. (<span class="b">Voltar</span> retorna ao carrinho sem vender.)</span></li>
             <li><span>Aparece <strong>Venda concluída</strong> com o número da venda. Clique em <span class="b">Fechar</span>.</span></li>
           </ol>
           <ul class="lista">
             <li>Carrinho vazio ou produto sem estoque suficiente: o sistema recusa ("Carrinho vazio.", "Sem estoque suficiente.").</li>
-            <li>A venda baixa o estoque na hora.</li>
+            <li>A venda baixa o estoque na hora e entra como recebida.</li>
             <li>O botão <span class="b">Cancelar venda</span> ao lado do carrinho só <strong>esvazia o carrinho</strong> antes de finalizar. Para desfazer uma venda já concluída, veja <a href="#vi-dia">Vendas do dia</a>.</li>
-            <li>O vendedor interno não emite nota. A venda fica em <em>Aguardando nota</em> para o ADM Master emitir.</li>
+            <li>O vendedor interno não emite nota. A janela <strong>Venda concluída</strong> avisa que a nota é emitida pelo ADM Master. A venda fica em <em>Aguardando nota</em> para ele emitir.</li>
           </ul>
-          <div class="aviso atencao">
-            <strong class="t">Cuidado com o botão de nota</strong>
-            <p>Na janela <strong>Venda concluída</strong> existe o botão <span class="b">Emitir Nota Fiscal de Venda (simulação)</span>. Ele só gera um PDF de <strong>prévia, sem valor fiscal</strong>. Nenhuma nota de verdade é emitida por ali: a nota real é emitida pelo ADM Master em Notas Fiscais.</p>
-          </div>
         </div>
 
-        <div class="tela" id="vi-dia">
+                <div class="tela" id="vi-dia">
           <span class="menu-tag">Menu · Vendas do dia</span>
           <h3>Vendas do dia</h3>
-          <p>Todas as vendas feitas hoje. Se uma venda foi feita por engano, ela pode ser cancelada, mas <strong>só com a autorização do ADM Master</strong>:</p>
+          <p>As vendas feitas <strong>hoje</strong>, com a quantidade e o valor total no topo. Só as vendas com status <em>Consolidada</em> têm o botão de cancelar. Se uma venda foi feita por engano, ela pode ser cancelada, mas <strong>só com a autorização do ADM Master</strong>:</p>
           <ol class="passos">
-            <li><span>Na venda, clique em <span class="b">Cancelar</span>.</span></li>
+            <li><span>Na venda, clique em <span class="b">Cancelar</span>. Abre a janela <strong>Cancelar venda finalizada</strong>.</span></li>
             <li><span>Preencha o <span class="campo">Motivo do cancelamento*</span>.</span></li>
             <li><span>O ADM Master digita a <span class="campo">Matrícula do ADM*</span> e a <span class="campo">Senha do ADM*</span> dele.</span></li>
-            <li><span>Confirme. Aparece "Venda cancelada e estoque restaurado."</span></li>
+            <li><span>Clique em <span class="b">Confirmar cancelamento</span> (só libera com os três campos preenchidos; <span class="b">Fechar</span> desiste). Aparece "Venda cancelada e estoque restaurado."</span></li>
           </ol>
         </div>
 
-        <div class="tela" id="vi-estoque">
+                <div class="tela" id="vi-estoque">
           <span class="menu-tag">Menu · Estoque</span>
           <h3>Controle de Estoque</h3>
-          <p>Três abas: <span class="b">Novo Produto</span>, <span class="b">Entrada de Lote</span> e <span class="b">Fornecedores</span>.</p>
+          <p>Quatro abas: <span class="b">Produtos</span> (a lista), <span class="b">Novo Produto</span>, <span class="b">Entrada de Lote</span> e <span class="b">Fornecedores</span>.</p>
           <dl class="termos">
-            <dt>Novo Produto</dt><dd>Mesmo cadastro do ADM: <span class="campo">Nome*</span>, <span class="campo">SKU*</span>, <span class="campo">Código de barras*</span>, <span class="campo">Fabricante*</span>, categoria, preço, quantidade e mínimo. Clique em <span class="b">Salvar Produto</span>. (Os dados fiscais, NCM e outros, são preenchidos pelo ADM.)</dd>
-            <dt>Entrada de Lote</dt><dd>Quando chegam produtos do fornecedor: escolha o <span class="campo">Produto*</span>, o <span class="campo">Fornecedor</span>, a <span class="campo">Quantidade*</span>, o <span class="campo">Custo unitário</span> e o <span class="campo">Nº da nota fiscal</span>, e clique em <span class="b">Salvar Entrada</span>. Aparece "Entrada de estoque registrada."</dd>
-            <dt>Fornecedores</dt><dd>Cadastre <span class="campo">Nome*</span>, CNPJ, telefone, e-mail e contato e clique em <span class="b">Salvar Fornecedor</span>. A lista <strong>Fornecedores cadastrados</strong> fica logo abaixo.</dd>
+            <dt>Novo Produto</dt><dd>Mesmo cadastro do ADM: <span class="campo">Nome*</span>, <span class="campo">SKU*</span>, <span class="campo">Código de barras*</span>, <span class="campo">Fabricante*</span>, categoria, preço, quantidade e mínimo. Clique em <span class="b">Salvar Produto</span>. Aparece "Produto cadastrado." (Os dados fiscais, NCM e outros, são preenchidos pelo ADM.)</dd>
+            <dt>Entrada de Lote</dt><dd>Quando chegam produtos do fornecedor: escolha o <span class="campo">Produto*</span>, o <span class="campo">Fornecedor</span>, a <span class="campo">Quantidade*</span>, o <span class="campo">Custo unitário (R$)</span> e o <span class="campo">Nº da nota fiscal</span>, e clique em <span class="b">Salvar Entrada</span>. Aparece "Entrada de estoque registrada." As últimas entradas ficam listadas logo abaixo.</dd>
+            <dt>Fornecedores</dt><dd>Em <strong>Novo Fornecedor</strong>, cadastre <span class="campo">Nome*</span>, CNPJ, telefone, e-mail e contato e clique em <span class="b">Salvar Fornecedor</span>. Aparece "Fornecedor cadastrado." A lista <strong>Fornecedores cadastrados</strong> fica logo abaixo.</dd>
           </dl>
         </div>
 
@@ -621,29 +644,31 @@
         <div class="tela">
           <span class="menu-tag">Menu · Dashboard</span>
           <h3>Dashboard</h3>
-          <p>Seus números: <strong>Vendas Hoje</strong>, <strong>Total no Mês</strong>, <strong>Pedidos Reserva</strong> (pedidos que aguardam o ADM) e <strong>Clientes</strong>.</p>
+          <p>Seus números: <strong>Vendas Hoje</strong>, <strong>Total no Mês</strong>, <strong>Pedidos Reserva</strong> (pedidos que aguardam o ADM) e <strong>Clientes</strong>, com atalhos para <em>Clientes</em> e <em>Meus Pedidos</em>.</p>
         </div>
 
-        <div class="tela" id="ve-clientes">
+                <div class="tela" id="ve-clientes">
           <span class="menu-tag">Menu · Clientes e Meus Pedidos</span>
           <h3>Cliente novo e pedido</h3>
           <ol class="passos">
-            <li><span>Em <strong>Clientes</strong>, procure o cliente (nome, CNPJ ou telefone). Se ele não existir, clique em <span class="b">Novo cliente</span>, preencha <span class="campo">Nome*</span>, tipo, documento e contato e clique em <span class="b">Enviar para aprovação</span>. Aparece "Cliente cadastrado. Aguardando aprovação do ADM."</span></li>
+            <li><span>Em <strong>Clientes</strong>, procure o cliente (nome, CNPJ ou telefone). Se ele não existir, clique em <span class="b">Novo cliente</span>, preencha <span class="campo">Nome*</span>, <span class="campo">Tipo</span> (Condomínio, Pessoa Física ou Pessoa Jurídica), documento, e-mail, telefone, contato, cidade e UF e clique em <span class="b">Enviar para aprovação</span>.</span></li>
+            <li><span>Abre a janela <strong>Confira antes de enviar</strong>. Revise e clique em <span class="b">Confirmar e enviar</span> (ou em <span class="b">Voltar e corrigir</span>). Aparece "Cliente cadastrado. Aguardando aprovação do ADM." O cliente fica com o status <em>Aguardando validação</em> até o ADM aprovar.</span></li>
             <li><span>Clique no cliente. Você vê <strong>Dados do cliente</strong> e o <strong>Histórico de pedidos</strong>. Clique em <span class="b">Novo pedido</span>.</span></li>
-            <li><span>Procure os produtos, adicione os itens e escolha o <span class="campo">Pagamento</span>.</span></li>
-            <li><span>Envie. Aparece "Pedido enviado para o ADM aprovar."</span></li>
+            <li><span>Na tela <strong>Novo pedido</strong>, procure os produtos (por nome ou por categoria) e clique nos que quiser. Cada um mostra o <em>Estoque</em>. No quadro <strong>Pedido</strong>, use + e − para a quantidade e veja o <strong>Total</strong>.</span></li>
+            <li><span>Escolha o <span class="campo">Pagamento</span> (PIX, Boleto, Cartão de Crédito, Cartão de Débito ou Dinheiro) e clique em <span class="b">Enviar pedido</span>.</span></li>
+            <li><span>Na janela <strong>Confira antes de enviar</strong>, clique em <span class="b">Confirmar e enviar</span>. Aparece "Pedido enviado para o ADM aprovar."</span></li>
           </ol>
-          <p>Se pedir mais do que existe no estoque, o sistema avisa (o ADM pode não conseguir aprovar).</p>
-          <p><strong>Meus Pedidos</strong> mostra tudo o que você enviou, com filtro e busca por cliente. Cada pedido está em um destes estados: <em>Aguardando ADM</em>, <em>Aprovado</em> ou <em>Rejeitado</em>. Quando rejeitado, o motivo aparece no pedido.</p>
+          <p>Se pedir mais do que existe no estoque, o sistema avisa o estoque atual (o ADM pode não conseguir aprovar).</p>
+          <p><strong>Meus Pedidos</strong> mostra tudo o que você enviou, com busca por cliente e filtro <em>Todos</em>, <em>Aguardando ADM</em>, <em>Aprovado</em> ou <em>Rejeitado</em>. Quando rejeitado, o motivo aparece no pedido.</p>
         </div>
 
-        <div class="tela" id="ve-orcamentos">
+                <div class="tela" id="ve-orcamentos">
           <span class="menu-tag">Menu · Orçamentos</span>
           <h3>Orçamentos</h3>
           <ol class="passos">
             <li><span>Clique em <span class="b">Novo orçamento</span>.</span></li>
             <li><span>Escolha o <span class="campo">Cliente*</span>, preencha a <span class="campo">Descrição do serviço*</span> e, se quiser, o <span class="campo">Valor estimado (R$)</span>.</span></li>
-            <li><span>Clique em <span class="b">Enviar para validação</span>. Aparece "Orçamento enviado para validação." O ADM decide em Ordens de Serviço.</span></li>
+            <li><span>Clique em <span class="b">Enviar para validação</span>. Na janela <strong>Confira antes de enviar</strong>, clique em <span class="b">Confirmar e enviar</span>. Aparece "Orçamento enviado para validação." O ADM decide em Ordens de Serviço.</span></li>
           </ol>
         </div>
       </section>
@@ -656,33 +681,46 @@
         <div class="tela">
           <span class="menu-tag">Menu · Dashboard</span>
           <h3>Dashboard</h3>
-          <p>Mostra <strong>Hoje</strong>, <strong>Agendadas</strong> e <strong>Em andamento</strong>, a <strong>Agenda de hoje</strong> e as <strong>Próximas manutenções</strong> que o ADM liberou para você.</p>
+          <p>Mostra <strong>Hoje</strong>, <strong>Agendadas</strong> e <strong>Em andamento</strong>, atalhos para <em>Minha Agenda</em> e <em>Clientes</em>, a tabela <strong>Agenda de hoje</strong> e as <strong>Próximas manutenções</strong> que o ADM liberou para você (Cliente, Descrição, Data prevista e contagem de dias, com o link <em>Ver cliente</em>). As manutenções são só um lembrete.</p>
         </div>
 
-        <div class="tela" id="fc-agenda">
+                <div class="tela" id="fc-agenda">
           <span class="menu-tag">Menu · Minha Agenda</span>
           <h3>Atender uma tarefa</h3>
+          <p>As tarefas são marcadas pelo ADM (Delegação de Serviços). Em <strong>Minha Agenda</strong> aparece um calendário do mês: os dias com tarefa têm um pontinho. Clique no dia e, embaixo, clique no serviço para abrir. No Dashboard, a <strong>Agenda de hoje</strong> tem o link <em>Ver</em>, e se houver serviço em andamento aparece um aviso no topo (<em>Toque para continuar</em>).</p>
           <ol class="passos">
-            <li><span>Em <strong>Minha Agenda</strong> (ou no Dashboard), abra a tarefa do dia. A tela <strong>Detalhes da tarefa</strong> mostra o cliente e a <strong>Ordem de Serviço vinculada</strong>, se houver.</span></li>
-            <li><span>Ao chegar, clique em <span class="b">Iniciar</span>. Aparece "Serviço iniciado."</span></li>
-            <li><span>Em <strong>Registrar atendimento</strong>, escreva <span class="campo">O que foi feito</span> (ex.: "Troca do selo mecânico, limpeza do filtro") e/ou anexe <strong>até 6 fotos</strong>. É preciso pelo menos um texto ou uma foto.</span></li>
-            <li><span>Na tela <strong>Confira o registro antes de salvar</strong>, revise e salve. Aparece "Registro salvo." Você pode fazer vários registros no mesmo serviço.</span></li>
-            <li><span>Ao terminar, clique em <span class="b">Finalizar</span>. Aparece "Serviço concluído."</span></li>
+            <li><span>Na tela da tarefa (o título é a descrição dela) você vê o cliente, o <strong>Detalhes da tarefa</strong> e, se houver, a <strong>Ordem de Serviço vinculada</strong>.</span></li>
+            <li><span>Ao chegar, clique em <span class="b">Iniciar</span>. Aparece "Serviço iniciado." (Se houver OS vinculada, ela passa a <em>Em execução</em>.)</span></li>
+            <li><span>Se a tarefa tem OS vinculada, aparece o quadro <strong>Registrar atendimento</strong>: escreva <span class="campo">O que foi feito</span> (ex.: "Troca do selo mecânico, limpeza do filtro") e/ou clique em <span class="b">Adicionar fotos</span> (até <strong>6 fotos</strong>). É preciso pelo menos um texto ou uma foto. Depois clique em <span class="b">Salvar registro</span>.</span></li>
+            <li><span>Na janela <strong>Confira o registro antes de salvar</strong>, revise e clique em <span class="b">Confirmar e salvar</span>. Aparece "Registro salvo." Você pode fazer vários registros no mesmo serviço; eles ficam em <strong>Registros deste serviço</strong>.</span></li>
+            <li><span>Ao terminar, clique em <span class="b">Finalizar</span>. Aparece "Serviço concluído." (A OS vinculada também vira <em>Concluída</em> e o valor vai para <em>A receber</em>.)</span></li>
           </ol>
-          <p><strong>Histórico:</strong> todo o seu trabalho, com filtro por período (<span class="campo">De</span> e <span class="campo">Até</span>) e por <span class="campo">Status</span> (Agendadas, Em andamento, Concluídas).</p>
-          <p><strong>Clientes / Condomínios:</strong> busque por nome ou endereço. No cliente você vê os dados, o <strong>Histórico de serviços</strong> e, nas OS dele, pode <span class="b">Iniciar OS</span>, <span class="b">Adicionar registro</span> com fotos e <span class="b">Finalizar serviço da OS</span>. Também dá para ver o que já foi registrado em <span class="b">Ver registros e fotos</span>.</p>
+          <div class="aviso">
+            <strong class="t">Tarefa sem OS vinculada</strong>
+            <p>Sem OS vinculada não há o quadro de registro: o sistema avisa que não dá para registrar notas ou fotos e que você deve usar <span class="b">Finalizar</span> para concluir.</p>
+          </div>
+          <p><strong>Histórico de Atividades:</strong> mostra Total, Agendadas, Em andamento e Concluídas, e uma tabela com Data, Cliente, Serviço, Status e Concluído em. Filtre por período (<span class="campo">De</span> e <span class="campo">Até</span>) e por <span class="campo">Status</span> (Aguardando validação, Validada, Em execução, Concluída ou Cancelada).</p>
+          <h3 style="font-size:1.05rem;margin-top:14px">Clientes / Condomínios e as OS</h3>
+          <p>Busque por nome ou endereço e clique no cliente. Ele mostra os <strong>Dados</strong> (telefone, e-mail, cidade e próxima manutenção) e o <strong>Histórico de serviços</strong> com as OS dele. Em cada OS aparecem ícones (passe o mouse para ver o nome):</p>
+          <ul class="lista">
+            <li><strong>Iniciar OS</strong>: aparece quando o ADM já validou a OS. Aparece "OS iniciada."</li>
+            <li><strong>Adicionar fotos ao registro</strong>: com a OS em execução. Abre <strong>Adicionar registro</strong> (texto e/ou fotos), com a conferência e <span class="b">Confirmar e salvar</span>.</li>
+            <li><strong>Finalizar serviço da OS</strong>: com a OS em execução, só para o técnico dono dela. Abre <strong>Finalizar serviço</strong>; clique em <span class="b">Finalizar</span>. Aparece "OS finalizada."</li>
+            <li><strong>Ver registros e fotos</strong>: mostra o que já foi registrado.</li>
+          </ul>
         </div>
 
-        <div class="tela" id="fc-orcamentos">
+                <div class="tela" id="fc-orcamentos">
           <span class="menu-tag">Menu · Orçamentos / OS</span>
           <h3>Orçamentos e Ordens de Serviço</h3>
+          <p>Duas abas com a quantidade de cada uma: <span class="b">Orçamento</span> e <span class="b">Ordens de Serviço</span>. A tabela mostra Cliente, Itens (ou descrição), Valor, Status e Data, e cada linha tem <span class="b">Gerar PDF</span> para baixar e mostrar ao cliente.</p>
           <ol class="passos">
-            <li><span>Clique em <span class="b">Novo</span>.</span></li>
-            <li><span>Escolha o <span class="campo">Tipo</span> (orçamento ou OS) e o <span class="campo">Cliente*</span>. Escreva a <span class="campo">Descrição*</span>, a <span class="campo">Data prevista</span> e o <span class="campo">Valor estimado</span>.</span></li>
-            <li><span>Para detalhar o preço, use <span class="b">Adicionar item</span>: nome do item e valor de cada um.</span></li>
-            <li><span>Clique em <span class="b">Enviar para validação</span>. Aparece "Criado e enviado para validação." O ADM decide em Ordens de Serviço.</span></li>
+            <li><span>Clique em <span class="b">Novo</span>. Abre <strong>Novo Orçamento</strong> ou <strong>Nova Ordem de Serviço</strong>, conforme a aba. Dá para trocar em <span class="campo">Tipo</span>.</span></li>
+            <li><span>Escolha o <span class="campo">Cliente*</span> e, se quiser, a <span class="campo">Data prevista</span>.</span></li>
+            <li><span><strong>Orçamento:</strong> preencha os itens (<em>Nome do item*</em>, <em>Descrição/justificativa</em> e <em>Valor (R$)</em>). Use <span class="b">Adicionar item</span> para mais linhas; o <strong>Total</strong> soma sozinho. Precisa de pelo menos um item com nome.</span></li>
+            <li><span><strong>Ordem de Serviço:</strong> preencha o <span class="campo">Valor estimado (R$)</span> e a <span class="campo">Descrição*</span>.</span></li>
+            <li><span>Clique em <span class="b">Enviar para validação</span>. Na janela <strong>Confira o orçamento antes de enviar</strong> (ou <strong>Confira a OS antes de enviar</strong>), clique em <span class="b">Confirmar e enviar</span>. Aparece "Orçamento criado e enviado para validação." (ou "Criado e enviado para validação."). O ADM decide em Ordens de Serviço.</span></li>
           </ol>
-          <p>Use <span class="b">Gerar PDF</span> para baixar o orçamento e mostrar ao cliente.</p>
         </div>
       </section>
 
@@ -694,7 +732,7 @@
         <p class="fluxo-titulo">Venda de balcão até a nota</p>
         <div class="fluxo">
           <span class="etapa"><small>Vendedor Interno</small>Vende no PDV</span><span class="seta">→</span>
-          <span class="etapa"><small>Automático</small>Estoque baixa</span><span class="seta">→</span>
+          <span class="etapa"><small>Automático</small>Estoque baixa e a venda entra como recebida</span><span class="seta">→</span>
           <span class="etapa"><small>ADM · Notas Fiscais</small>Aguardando nota</span><span class="seta">→</span>
           <span class="etapa"><small>ADM</small>Emite NF-e</span>
         </div>
@@ -703,32 +741,34 @@
         <div class="fluxo">
           <span class="etapa"><small>Vendedor Externo</small>Envia o pedido</span><span class="seta">→</span>
           <span class="etapa"><small>ADM · Vendas Externas</small>Faturar Pedido</span><span class="seta">→</span>
-          <span class="etapa"><small>Automático</small>Estoque baixa e vira "a receber"</span><span class="seta">→</span>
-          <span class="etapa"><small>ADM · Financeiro</small>Confirma o recebimento</span>
+          <span class="etapa"><small>Automático</small>Estoque baixa e a venda entra como recebida</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Notas Fiscais</small>Aguardando nota</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM</small>Emite NF-e</span>
         </div>
 
         <p class="fluxo-titulo">Ordem de serviço até a nota de serviço</p>
         <div class="fluxo">
           <span class="etapa"><small>Técnico ou Vend. Externo</small>Cria orçamento/OS</span><span class="seta">→</span>
           <span class="etapa"><small>ADM · Ordens de Serviço</small>Valida</span><span class="seta">→</span>
-          <span class="etapa"><small>Técnico</small>Executa e registra</span><span class="seta">→</span>
-          <span class="etapa"><small>ADM</small>Conclui e confirma o recebimento</span><span class="seta">→</span>
+          <span class="etapa"><small>Técnico</small>Inicia a OS</span><span class="seta">→</span>
+          <span class="etapa"><small>Técnico</small>Registra e finaliza (a OS vira Concluída)</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Financeiro</small>Confirma o recebimento</span><span class="seta">→</span>
           <span class="etapa"><small>ADM</small>Emite NFS-e</span>
         </div>
+        <p>Se o ADM delegou uma tarefa com a OS vinculada, o técnico faz o mesmo pela agenda: Iniciar, Registrar atendimento e Finalizar.</p>
 
         <p class="fluxo-titulo">Manutenção preventiva</p>
         <div class="fluxo">
           <span class="etapa"><small>ADM · Manutenção</small>Cria o plano</span><span class="seta">→</span>
           <span class="etapa"><small>ADM</small>Libera para o técnico</span><span class="seta">→</span>
-          <span class="etapa"><small>Técnico</small>Vê em "Próximas manutenções"</span><span class="seta">→</span>
-          <span class="etapa"><small>Técnico</small>Atende e registra</span>
+          <span class="etapa"><small>Técnico</small>Vê o lembrete em "Próximas manutenções"</span><span class="seta">→</span>
+          <span class="etapa"><small>ADM · Delegação</small>Agenda a visita como tarefa</span>
         </div>
 
         <p class="fluxo-titulo">Cliente novo de campo</p>
         <div class="fluxo">
           <span class="etapa"><small>Vendedor Externo</small>Cadastra o cliente</span><span class="seta">→</span>
-          <span class="etapa"><small>ADM · Clientes</small>Aprova ou rejeita</span><span class="seta">→</span>
-          <span class="etapa"><small>Vendedor Externo</small>Já pode fazer pedidos</span>
+          <span class="etapa"><small>ADM · Clientes</small>Aprova ou rejeita</span>
         </div>
       </section>
 
@@ -748,8 +788,8 @@
                 <tr><td>O NCM tem 8 números / O CFOP tem 4 / O CSOSN tem 3</td><td>Dado fiscal do produto com tamanho errado.</td><td>Digite só números, com a quantidade certa.</td></tr>
                 <tr><td>Sem estoque suficiente</td><td>A quantidade pedida passa do que existe.</td><td>Diminua a quantidade ou dê entrada no estoque.</td></tr>
                 <tr><td>Senha deve ter ao menos 6 caracteres</td><td>Senha curta demais.</td><td>Use 6 caracteres ou mais.</td></tr>
-                <tr><td>Nota "Com erro"</td><td>A Receita ou a prefeitura recusou a nota.</td><td>Abra a nota, leia o motivo e corrija o cadastro (documento ou endereço do cliente, dados fiscais do produto).</td></tr>
-                <tr><td>Justificativa com menos de 15 caracteres</td><td>Para cancelar nota é preciso explicar.</td><td>Escreva pelo menos 15 caracteres.</td></tr>
+                <tr><td>Nota "Com erro"</td><td>A Receita ou a prefeitura recusou a nota.</td><td>Abra a nota, leia o motivo, corrija o cadastro (por exemplo, o documento do cliente) e clique em "Corrigir e emitir de novo".</td></tr>
+                <tr><td>Botão "Cancelar nota" que não aperta</td><td>O motivo do cancelamento ainda tem menos de 15 caracteres.</td><td>Escreva pelo menos 15 caracteres.</td></tr>
               </tbody>
             </table>
           </div>
@@ -761,6 +801,8 @@
             <li>Não existe botão para <strong>excluir</strong> usuário, cliente ou produto. Use <em>Desativar</em> quando for o caso.</li>
             <li>O Vendedor Interno e os outros perfis <strong>não emitem nota fiscal</strong>: só o ADM Master.</li>
             <li>As notas emitidas hoje são de <strong>homologação</strong> e não têm valor fiscal.</li>
+            <li>A conta <em>A receber</em> do Financeiro só recebe <strong>serviços concluídos</strong>. Vendas do balcão e pedidos externos faturados já entram como recebidos.</li>
+            <li>Manutenção preventiva liberada aparece só como lembrete para o técnico. Nenhuma tela marca a manutenção como feita.</li>
           </ul>
         </div>
       </section>
