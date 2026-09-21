@@ -1,0 +1,475 @@
+/* Banner shown only in PRODUÇÃO: the note has real fiscal value */
+.env {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid;
+  margin-bottom: 1rem;
+}
+.envTag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.envText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.envText span {
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+}
+.producao {
+  border-color: hsl(var(--destructive) / 0.6);
+  background: hsl(var(--destructive) / 0.12);
+}
+.producao .envTag {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground, 0 0% 100%));
+}
+
+.warnBox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 1rem;
+  border: 1px solid hsl(var(--warning) / 0.45);
+  background: hsl(var(--warning) / 0.1);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+}
+.warnBox svg {
+  flex-shrink: 0;
+  color: hsl(var(--warning));
+}
+.warnBox span {
+  flex: 1;
+}
+
+/* status counters — also work as filters */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+}
+.tile small {
+  font-size: 0.78rem;
+  color: hsl(var(--muted-foreground));
+}
+.tile strong {
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+.tile:hover {
+  border-color: hsl(var(--primary) / 0.5);
+}
+.tile.on {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+}
+.autorizado strong { color: hsl(var(--success)); }
+.processando strong { color: hsl(var(--warning)); }
+.erro strong { color: hsl(var(--destructive)); }
+
+@media (max-width: 640px) {
+  .tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+.empty {
+  padding: 1.5rem 1.25rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9rem;
+}
+
+/* "Aguardando nota": one card per sale / service order, with every item listed */
+.pendBody {
+  padding: 1rem 1.25rem 1.25rem;
+}
+.pendGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+}
+.pendCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--background) / 0.5);
+}
+.pendHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+.pendTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+}
+.pendDate {
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+.pendClient {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.pendClient strong {
+  overflow-wrap: anywhere;
+}
+.pendClient span {
+  font-size: 0.82rem;
+  color: hsl(var(--muted-foreground));
+}
+.pendItems {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid hsl(var(--border));
+}
+.pendItemsHead {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0 0.3rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: hsl(var(--muted-foreground));
+}
+.pendItem {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr auto;
+  align-items: start;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid hsl(var(--border) / 0.6);
+  font-size: 0.92rem;
+}
+.pendQty {
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+.pendItemText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.pendItemText small {
+  font-size: 0.78rem;
+  color: hsl(var(--muted-foreground));
+}
+.linkBtn {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 0.4rem 0 0.1rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: hsl(var(--primary));
+  cursor: pointer;
+}
+.linkBtn:hover {
+  text-decoration: underline;
+}
+.pendTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: auto; /* cards in the same row line their totals and buttons up at the bottom */
+  padding-top: 0.6rem;
+  border-top: 1px solid hsl(var(--border));
+}
+.pendTotal strong {
+  font-size: 1.35rem;
+  color: hsl(var(--primary));
+}
+.pendCard .pendBtn {
+  width: 100%;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+}
+.val {
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* filter of the "Aguardando nota" cards: same look as the one of the table below */
+.pendToolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem 0;
+}
+.pendToolbar input {
+  flex: 1;
+  min-width: 200px;
+  width: auto;
+}
+
+.listTitle {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.pendBody .pendPager {
+  margin-top: 1rem;
+  padding: 0.75rem 0 0;
+}
+
+/* tabs / mode switch */
+.seg {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.seg button {
+  background: hsl(var(--card));
+  color: hsl(var(--muted-foreground));
+  border: 0;
+  padding: 0.5rem 0.9rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.seg button + button {
+  border-left: 1px solid hsl(var(--border));
+}
+.seg button.on {
+  background: hsl(var(--primary) / 0.18);
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+/* detail */
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.lbl {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.35rem;
+}
+.whoBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid hsl(var(--primary) / 0.4);
+  background: hsl(var(--primary) / 0.08);
+  border-radius: var(--radius);
+}
+.whoBox strong {
+  overflow-wrap: anywhere;
+}
+.line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 0.92rem;
+}
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 0.6rem;
+}
+.total strong {
+  font-size: 1.3rem;
+  color: hsl(var(--primary));
+}
+.errbox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid hsl(var(--destructive) / 0.5);
+  background: hsl(var(--destructive) / 0.1);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.key {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.key code {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  word-break: break-all;
+  background: hsl(var(--muted));
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.steps li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: 0.9rem;
+}
+.steps li::before {
+  content: '';
+  position: absolute;
+  left: 0.15rem;
+  top: 0.35rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: hsl(var(--success));
+}
+.steps li small {
+  display: block;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.78rem;
+}
+.steps .pendingStep::before { background: hsl(var(--warning)); }
+.steps .failStep::before { background: hsl(var(--destructive)); }
+.steps .offStep::before { background: hsl(var(--muted-foreground)); }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.spacer {
+  flex: 1;
+}
+
+/* popup with every item of a pending sale / OS */
+.itemsScroll {
+  overflow-y: auto; /* its max-height is set from the header + first 6 rows (ScrollBox) */
+}
+.itemsTable {
+  width: 100%;
+  border-collapse: separate; /* keeps the borders of the sticky header while the rows scroll */
+  border-spacing: 0;
+  font-size: 0.92rem;
+}
+.itemsTable th {
+  position: sticky;
+  top: 0; /* the header stays in view while a long list scrolls */
+  background: hsl(var(--card));
+  padding: 0.5rem 0.4rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+}
+.itemsTable td {
+  padding: 0.55rem 0.4rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.itemsTable .num {
+  text-align: right;
+  white-space: nowrap;
+}
+.popFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+.footTotal {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.footTotal strong {
+  font-size: 1.35rem;
+  color: hsl(var(--primary));
+}
+.footBtns {
+  display: flex;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
+/* sale summary at the top of "Quem recebe a NF-e?": the items as a tidy, scrollable list */
+.saleBox {
+  border: 1px solid hsl(var(--primary) / 0.4);
+  background: hsl(var(--primary) / 0.08);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+}
+.saleHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 0.4rem;
+}
+.saleHead strong {
+  font-size: 1.25rem;
+  color: hsl(var(--primary));
+}
+.saleItems {
+  overflow-y: auto; /* its max-height is set from the first 6 rows (ScrollRows) */
+  padding-right: 0.25rem;
+}

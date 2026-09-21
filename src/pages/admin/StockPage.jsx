@@ -15,7 +15,20 @@ import { Input, Select } from '@/components/ui/Field';
 import { brl, dateBR } from '@/lib/format';
 import shared from '../shared.module.css';
 
-const EMPTY_PRODUCT = { name: '', sku: '', barcode: '', category: 'PUMP', manufacturer: '', sale_price: '', stock_quantity: 0, min_stock: 5, unit: 'un', is_active: true };
+const EMPTY_PRODUCT = { name: '', sku: '', barcode: '', category: 'PUMP', manufacturer: '', sale_price: '', stock_quantity: 0, min_stock: 5, unit: 'un', is_active: true, ncm: '', cfop: '', origin: '', csosn: '' };
+
+// Origin of the goods (ICMS): the code the invoice needs; 0 is the usual one for national products.
+const ORIGIN_OPTIONS = [
+  { value: 0, label: '0 — Nacional' },
+  { value: 1, label: '1 — Estrangeira (importação direta)' },
+  { value: 2, label: '2 — Estrangeira (comprada no mercado interno)' },
+  { value: 3, label: '3 — Nacional (importação entre 40% e 70%)' },
+  { value: 4, label: '4 — Nacional (processos produtivos básicos)' },
+  { value: 5, label: '5 — Nacional (importação até 40%)' },
+  { value: 6, label: '6 — Estrangeira (importação direta, sem similar)' },
+  { value: 7, label: '7 — Estrangeira (mercado interno, sem similar)' },
+  { value: 8, label: '8 — Nacional (importação acima de 70%)' },
+];
 
 const CATEGORY_OPTIONS = [
   { value: 'PUMP', label: 'Bomba' },
@@ -56,6 +69,11 @@ export default function StockPage() {
     if (!form.sku.trim()) return toast.error('Informe o SKU.');
     if (!form.barcode.trim()) return toast.error('Informe o código de barras.');
     if (!form.manufacturer.trim()) return toast.error('Informe o fabricante.');
+    // fiscal data is optional, but when filled it must have the right size (the server would refuse it anyway)
+    const digits = (v) => String(v ?? '').replace(/\D/g, '');
+    if (digits(form.ncm) && digits(form.ncm).length !== 8) return toast.error('O NCM tem 8 números (ex.: 84137090).');
+    if (digits(form.cfop) && digits(form.cfop).length !== 4) return toast.error('O CFOP tem 4 números (ex.: 5102).');
+    if (digits(form.csosn) && digits(form.csosn).length !== 3) return toast.error('O CSOSN tem 3 números (ex.: 102).');
     try {
       if (editingId) {
         await db.Product.update(editingId, { ...form, sale_price: Number(form.sale_price), stock_quantity: Number(form.stock_quantity), min_stock: Number(form.min_stock) });
@@ -152,6 +170,7 @@ export default function StockPage() {
                     right={
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                         {!r.is_active && <Badge tone="muted">Inativo</Badge>}
+                        {!r.ncm && <Badge tone="warning">Sem código fiscal</Badge>}
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: low ? 'hsl(var(--destructive))' : 'inherit' }}>
                           {low && <AlertTriangle size={14} />}{r.stock_quantity} {r.unit}
                         </span>
@@ -201,6 +220,20 @@ export default function StockPage() {
           <Input label="Preço de venda (R$)" type="number" step="0.01" value={form.sale_price} onChange={f('sale_price')} />
           <Input label="Qtd. em estoque" type="number" value={form.stock_quantity} onChange={f('stock_quantity')} />
           <Input label="Estoque mínimo" type="number" value={form.min_stock} onChange={f('min_stock')} />
+
+          <div style={{ gridColumn: '1/-1', borderTop: '1px solid hsl(var(--border))', paddingTop: '0.9rem', marginTop: '0.3rem' }}>
+            <strong>Dados fiscais (nota fiscal)</strong>
+            <p className={shared.muted} style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
+              Quem define os códigos certos é a contadora. Em branco, a nota usa o código padrão da empresa, que serve só para teste.
+            </p>
+          </div>
+          <Input label="NCM (8 números)" inputMode="numeric" placeholder="Ex.: 84137090" value={form.ncm ?? ''} onChange={f('ncm')} />
+          <Input label="CFOP (4 números)" inputMode="numeric" placeholder="Ex.: 5102" value={form.cfop ?? ''} onChange={f('cfop')} />
+          <Select label="Origem da mercadoria" value={form.origin ?? ''} onChange={f('origin')}>
+            <option value="">Padrão da empresa (0 — Nacional)</option>
+            {ORIGIN_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </Select>
+          <Input label="CSOSN (3 números)" inputMode="numeric" placeholder="Ex.: 102" value={form.csosn ?? ''} onChange={f('csosn')} />
         </div>
       </Modal>
     </div>

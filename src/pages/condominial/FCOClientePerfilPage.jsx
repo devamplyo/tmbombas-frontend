@@ -9,6 +9,7 @@ import Card, { CardHeader, CardBody } from '@/components/ui/Card';
 import Table from '@/components/ui/Table';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import ConfirmSubmit from '@/components/ui/ConfirmSubmit';
 import Spinner from '@/components/ui/Spinner';
 import Modal from '@/components/ui/Modal';
 import { Textarea } from '@/components/ui/Field';
@@ -53,6 +54,7 @@ export default function FCOClientePerfilPage() {
   const [note, setNote] = useState('');
   const [photos, setPhotos] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
 
   const canRegisterPhotos = user?.role === 'tecnico';
   const [startingId, setStartingId] = useState(null);
@@ -108,11 +110,16 @@ export default function FCOClientePerfilPage() {
 
   const removePhoto = (idx) => setPhotos((prev) => prev.filter((_, i) => i !== idx));
 
-  const submitRecord = async () => {
+  // the button only checks and opens the "confira antes de salvar" screen — nothing is saved yet
+  const askConfirm = () => {
     if (!note.trim() && photos.length === 0) {
       toast.error('Escreva um texto ou anexe pelo menos uma foto.');
       return;
     }
+    setConfirmando(true);
+  };
+
+  const submitRecord = async () => {
     setSaving(true);
     try {
       await addServiceRecord(addRecordOrder.id, { note: note.trim() || undefined, photos });
@@ -124,6 +131,7 @@ export default function FCOClientePerfilPage() {
       toast.error(e.message);
     } finally {
       setSaving(false);
+      setConfirmando(false);
     }
   };
 
@@ -323,7 +331,7 @@ export default function FCOClientePerfilPage() {
           </span>
         </div>
 
-        <Button style={{ marginTop: '1rem' }} onClick={submitRecord} disabled={saving}>
+        <Button style={{ marginTop: '1rem' }} onClick={askConfirm} disabled={saving}>
           {saving ? 'Salvando...' : 'Salvar registro'}
         </Button>
       </Modal>
@@ -361,6 +369,18 @@ export default function FCOClientePerfilPage() {
           </div>
         )}
       </Modal>
+
+      <ConfirmSubmit
+        open={confirmando}
+        title="Confira o registro antes de salvar"
+        client={client?.name}
+        note={{ label: 'O que foi feito', text: note.trim() }}
+        photos={photos}
+        saving={saving}
+        confirmLabel="Confirmar e salvar"
+        onCancel={() => setConfirmando(false)}
+        onConfirm={submitRecord}
+      />
 
       {lightbox && (
         <div

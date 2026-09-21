@@ -16,6 +16,7 @@ const STATUS = {
 };
 
 const JUSTIFICATIVA_MIN = 15;
+const POLL_MS = 2000; // how often a note that is still "processando" is asked about
 
 // These calls don't go through client.js's `req()`, so they attach the session
 // token themselves — without it the backend rejects /api/nfse/** with 403.
@@ -42,6 +43,7 @@ export default function NfseSection({ os }) {
   const [justificativa, setJustificativa] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const pollRef = useRef(null);
+  const consultingRef = useRef(false); // a round is still waiting for the server: don't start another
 
   // Loads config + this service order's existing invoice
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function NfseSection({ os }) {
   useEffect(() => {
     clearInterval(pollRef.current);
     if (invoice?.status === 'processando') {
-      pollRef.current = setInterval(consult, 5000);
+      pollRef.current = setInterval(consult, POLL_MS);
     }
     return () => clearInterval(pollRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,12 +104,15 @@ export default function NfseSection({ os }) {
   };
 
   const consult = async () => {
-    if (!invoice) return;
+    if (!invoice || consultingRef.current) return;
+    consultingRef.current = true;
     try {
       const res = await fetch(`/api/nfse/${invoice.id}/consult`, { headers: authHeaders() });
       const body = await res.json();
       if (res.ok) setInvoice(body);
-    } catch { /* tries again on the next cycle */ }
+    } catch { /* tries again on the next cycle */ } finally {
+      consultingRef.current = false;
+    }
   };
 
   const confirmCancel = async () => {

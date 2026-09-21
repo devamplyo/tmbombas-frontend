@@ -9,6 +9,7 @@ import Card, { CardBody } from '@/components/ui/Card';
 import ListRow from '@/components/ui/ListRow';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import ConfirmSubmit from '@/components/ui/ConfirmSubmit';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import { Input, Select } from '@/components/ui/Field';
@@ -24,14 +25,23 @@ export default function VEXClientesPage() {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
+  const [confirmando, setConfirmando] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // the button only checks and opens the "confira antes de enviar" screen — nothing is sent yet
+  const askConfirm = () => {
+    if (!form.name.trim()) return toast.error('Informe o nome.');
+    setConfirmando(true);
+  };
 
   const save = async () => {
-    if (!form.name.trim()) return toast.error('Informe o nome.');
+    setSaving(true);
     try {
       await db.Client.create({ ...form, validation_status: 'aguardando_validacao', registered_by_role: user.role });
       toast.success('Cliente cadastrado. Aguardando aprovação do ADM.');
       setOpen(false); setForm(EMPTY); reload();
     } catch (e) { toast.error(e.message); }
+    finally { setSaving(false); setConfirmando(false); }
   };
 
   const filtered = (clients || []).filter((c) => {
@@ -69,7 +79,7 @@ export default function VEXClientesPage() {
       </Card>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Novo cliente"
-        footer={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={save}>Enviar para aprovação</Button></>}>
+        footer={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={askConfirm}>Enviar para aprovação</Button></>}>
         <div className={shared.formGrid}>
           <div style={{ gridColumn: '1/-1' }}><Input label="Nome*" value={form.name} onChange={f('name')} /></div>
           <Select label="Tipo" value={form.type} onChange={f('type')}>
@@ -83,6 +93,23 @@ export default function VEXClientesPage() {
           <Input label="UF" value={form.state} onChange={f('state')} />
         </div>
       </Modal>
+
+      <ConfirmSubmit
+        open={confirmando}
+        client={form.name}
+        rows={[
+          { label: 'Tipo', value: CLIENT_TYPE[form.type] || form.type },
+          { label: 'Documento', value: form.document },
+          { label: 'E-mail', value: form.email },
+          { label: 'Telefone', value: form.phone },
+          { label: 'Contato', value: form.contact_person },
+          { label: 'Cidade', value: form.city_name },
+          { label: 'UF', value: form.state },
+        ]}
+        saving={saving}
+        onCancel={() => setConfirmando(false)}
+        onConfirm={save}
+      />
     </div>
   );
 }

@@ -146,6 +146,11 @@ const intOrNull = (v) => {
   const n = parseInt(v, 10);
   return Number.isNaN(n) ? null : n;
 };
+// keeps only the digits (NCM "8413.70.90" -> "84137090"); empty -> null
+const digitsOrNull = (v) => {
+  const s = String(v ?? '').replace(/\D/g, '');
+  return s || null;
+};
 // 'YYYY-MM-DD' → 'YYYY-MM-DDT00:00:00' (backend's LocalDateTime fields)
 const toDateTime = (v) =>
   typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? `${v}T00:00:00` : v || null;
@@ -213,6 +218,7 @@ const CONFIG = {
       phone: r.phone,
       type: ENUM_TO_CLIENT_TYPE[r.type] || r.type,
       address: r.address,
+      state_registration: r.state_registration,
       city_name: r.address?.city,
       state: r.address?.state,
       // achado (descoberto ao corrigir F14): antes só existia `active` no
@@ -232,6 +238,8 @@ const CONFIG = {
         phone: d.phone || null,
         type: CLIENT_TYPE_TO_ENUM[d.type] || d.type,
         address: buildAddress(d),
+        // inscrição estadual: só empresa contribuinte de ICMS tem (NF-e)
+        state_registration: d.state_registration ? String(d.state_registration).trim() : null,
       }),
   },
 
@@ -261,6 +269,11 @@ const CONFIG = {
         barcode: d.barcode || null,
         min_stock: intOrNull(d.min_stock) ?? 0,
         unit: d.unit || 'un',
+        // fiscal data (NF-e) — the server only keeps these when the ADM Master sends them
+        ncm: digitsOrNull(d.ncm),
+        cfop: digitsOrNull(d.cfop),
+        origin: intOrNull(d.origin),
+        csosn: digitsOrNull(d.csosn),
       }),
   },
 
@@ -912,4 +925,64 @@ export async function cancelSale(saleId, { adminMatricula, adminPassword, reason
     admin_password: adminPassword,
     reason,
   });
+}
+
+/* ─────────────────────────  Notas Fiscais (NF-e e NFS-e)  ─────────────────────────
+ * One endpoint family for both kinds of document. ADM Master only.
+ * The server does the issuing — value, items and payment come from the sale / service order.
+ */
+
+/** Issuing environment for the banner: { env, simulate, ready_for_real, pendencia }. */
+export async function getInvoiceStatus() {
+  return req('GET', '/invoices/status');
+}
+
+/** Most recent documents (NF-e and NFS-e), newest first. */
+export async function listInvoices() {
+  return (await req('GET', '/invoices')) || [];
+}
+
+/** Sales and completed service orders that still have no note ("Aguardando nota"). */
+export async function listPendingInvoices() {
+  return (await req('GET', '/invoices/pending')) || [];
+}
+
+/** One document with its lines. */
+export async function getInvoice(id) {
+  return req('GET', `/invoices/${id}`);
+}
+
+/**
+ * Issues an NF-e from a sale. `recipient`: { clientId } for a registered client, or the typed data of a
+ * walk-in customer { name, document, stateRegistration, street, number, district, city, state, zipCode }.
+ */
+export async function emitNfe(saleId, recipient = {}) {
+  return req('POST', '/invoices/nfe', clean({
+    sale_id: saleId,
+    client_id: recipient.clientId ?? undefined,
+    name: recipient.name || undefined,
+    document: recipient.document || undefined,
+    state_registration: recipient.stateRegistration || undefined,
+    street: recipient.street || undefined,
+    number: recipient.number || undefined,
+    district: recipient.district || undefined,
+    city: recipient.city || undefined,
+    state: recipient.state || undefined,
+    zip_code: recipient.zipCode || undefined,
+  }));
+}
+
+/** Issues an NFS-e from a completed service order. */
+export async function emitNfseInvoice(serviceOrderId) {
+  return req('POST', '/invoices/nfse', { service_order_id: String(serviceOrderId) });
+}
+
+/** Asks the server to refresh the status of a document with Focus. */
+export async function consultInvoice(id) {
+  return req('POST', `/invoices/${id}/consult`);
+}
+
+/** Cancels an authorized document (reason: at least 15 characters). */
+export async function cancelInvoice(id, justificativa) {
+  return req('POST', `/invoices/${id}/cancel`, { justificativa });
 }

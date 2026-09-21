@@ -20,6 +20,7 @@ import ServiceOrdersPage from '@/pages/admin/ServiceOrdersPage';
 import ServiceDelegation from '@/pages/admin/ServiceDelegation';
 import ExternalSalesPage from '@/pages/admin/ExternalSalesPage';
 import UserManagement from '@/pages/admin/UserManagement';
+import NotasFiscaisPage from '@/pages/admin/NotasFiscaisPage';
 
 // Internal Salesperson
 import VIDashboard from '@/pages/vendedor/VIDashboard';
@@ -70,6 +71,7 @@ export default function App() {
                 <Route path="colaboradores" element={<CollaboratorsPage />} />
                 <Route path="colaboradores/:id" element={<CollaboratorDetailPage />} />
                 <Route path="ordens-servico" element={<ServiceOrdersPage />} />
+                <Route path="notas-fiscais" element={<NotasFiscaisPage />} />
                 <Route path="servicos" element={<ServiceDelegation />} />
                 <Route path="vendas-externas" element={<ExternalSalesPage />} />
                 <Route path="usuarios" element={<UserManagement />} />
