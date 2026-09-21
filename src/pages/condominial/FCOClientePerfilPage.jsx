@@ -29,9 +29,15 @@ export default function FCOClientePerfilPage() {
       db.ServiceOrder.filter({ client_id: id }, '-created_date'),
     ]);
     let recordCounts = {};
-    if (orders.length) {
-      const counts = await Promise.all(orders.map((o) => listServiceRecords(o.id)));
-      recordCounts = Object.fromEntries(orders.map((o, i) => [o.id, counts[i].length]));
+    // O backend só permite ao técnico ler registros das OSs atribuídas a ele
+    // (IDOR guard). Buscar para todas as OSs do cliente dispara 401 nas de
+    // outros técnicos, o que derruba a sessão inteira (ver req() em client.js).
+    const readableOrders = user?.role === 'tecnico'
+      ? orders.filter((o) => o.technician_id === user.id)
+      : orders;
+    if (readableOrders.length) {
+      const counts = await Promise.all(readableOrders.map((o) => listServiceRecords(o.id)));
+      recordCounts = Object.fromEntries(readableOrders.map((o, i) => [o.id, counts[i].length]));
     }
     return { client: clients[0] || null, orders, recordCounts };
   }, [id]);
