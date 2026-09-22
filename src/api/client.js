@@ -337,7 +337,15 @@ const CONFIG = {
       price: r.price,
       payment_status: 'a_receber', // backend doesn't model service order payment
       type: r.type === 'ORCAMENTO' ? 'orcamento' : 'os',
-      items: (r.items || []).map((i) => ({ id: i.id, name: i.name, description: i.description, value: i.value })),
+      items: (r.items || []).map((i) => ({
+        id: i.id,
+        name: i.name,
+        description: i.description,
+        value: i.value,
+        product_id: i.product_id,
+        product_name: i.product_name,
+        quantity: i.quantity,
+      })),
       order_number: r.order_number,
       completion_date: r.completed_at,
       created_date: r.created_at,
@@ -354,7 +362,13 @@ const CONFIG = {
         status: d.status ? OS_STATUS_TO_ENUM[d.status] || d.status : undefined,
         type: d.type === 'orcamento' ? 'ORCAMENTO' : d.type === 'os' ? 'OS' : undefined,
         items: d.items
-          ? d.items.map((i) => ({ name: i.name, description: i.description || null, value: Number(i.value) || 0 }))
+          ? d.items.map((i) => ({
+              name: i.name,
+              description: i.description || null,
+              value: Number(i.value) || 0,
+              product_id: numOrNull(i.product_id),
+              quantity: i.product_id ? Number(i.quantity) || 1 : null,
+            }))
           : undefined,
       }),
   },

@@ -18,7 +18,7 @@ import { generateServiceOrderPdf } from '@/lib/orderPdf';
 import { OS_STATUS } from '@/lib/status';
 import shared from '../shared.module.css';
 
-const EMPTY_ITEM = { name: '', description: '', value: '' };
+const EMPTY_ITEM = { name: '', description: '', value: '', product_id: '', quantity: 1 };
 const EMPTY_ORCAMENTO = { type: 'orcamento', client_id: '', scheduled_date: '', items: [{ ...EMPTY_ITEM }] };
 const EMPTY_OS = { type: 'os', client_id: '', description: '', service_value: '', scheduled_date: '' };
 
@@ -31,11 +31,12 @@ export default function FCOOrcamentosPage() {
   const { user } = useOutletContext();
   const toast = useToast();
   const { data, loading, reload } = useAsyncData(async () => {
-    const [orders, clients] = await Promise.all([
+    const [orders, clients, products] = await Promise.all([
       db.ServiceOrder.list('-created_date'),
       db.Client.filter({ validation_status: 'ativo' }),
+      db.Product.filter({ is_active: true }),
     ]);
-    return { orders, clients };
+    return { orders, clients, products };
   }, []);
   const [tab, setTab] = useState('orcamento');
   const [open, setOpen] = useState(false);
@@ -59,6 +60,35 @@ export default function FCOOrcamentosPage() {
 
   const updateItem = (idx, key, value) => {
     const items = form.items.map((it, i) => (i === idx ? { ...it, [key]: value } : it));
+    setForm({ ...form, items });
+  };
+  // ao escolher um produto do estoque, pré-preenche o nome (se ainda vazio) e
+  // recalcula o valor pelo preço do produto — o usuário continua podendo editar depois
+  const selectProduct = (idx, productId) => {
+    const product = data.products.find((p) => String(p.id) === String(productId));
+    const items = form.items.map((it, i) => {
+      if (i !== idx) return it;
+      const quantity = it.quantity || 1;
+      return {
+        ...it,
+        product_id: productId,
+        name: it.name.trim() || product?.name || it.name,
+        value: product ? String(product.sale_price * quantity) : it.value,
+      };
+    });
+    setForm({ ...form, items });
+  };
+  // com peça do estoque selecionada, mudar a quantidade recalcula o valor (preço x quantidade)
+  const updateQuantity = (idx, quantity) => {
+    const items = form.items.map((it, i) => {
+      if (i !== idx) return it;
+      const product = data.products.find((p) => String(p.id) === String(it.product_id));
+      return {
+        ...it,
+        quantity,
+        value: product ? String(product.sale_price * (Number(quantity) || 0)) : it.value,
+      };
+    });
     setForm({ ...form, items });
   };
   const addItem = () => setForm({ ...form, items: [...form.items, { ...EMPTY_ITEM }] });
@@ -117,7 +147,7 @@ export default function FCOOrcamentosPage() {
   const f = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   if (loading) return <div className={shared.loading}><Spinner /></div>;
-  const { clients } = data;
+  const { clients, products } = data;
   const orders = data.orders;
   // what they created or what was assigned to them — never another profile's
   const myOrders = orders.filter((o) => o.created_by_id === user.id || o.assigned_to_id === user.id);
@@ -187,11 +217,22 @@ export default function FCOOrcamentosPage() {
             <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>Itens do orçamento</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               {form.items.map((it, idx) => (
-                <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px auto', gap: '0.5rem', alignItems: 'start' }}>
-                  <Input placeholder="Nome do item*" value={it.name} onChange={(e) => updateItem(idx, 'name', e.target.value)} />
-                  <Input placeholder="Descrição/justificativa" value={it.description} onChange={(e) => updateItem(idx, 'description', e.target.value)} />
-                  <Input placeholder="Valor (R$)" type="number" step="0.01" value={it.value} onChange={(e) => updateItem(idx, 'value', e.target.value)} />
-                  <Button variant="ghost" size="sm" onClick={() => removeItem(idx)} disabled={form.items.length === 1}><Trash2 size={14} /></Button>
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.5rem', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px auto', gap: '0.5rem', alignItems: 'start' }}>
+                    <Input placeholder="Nome do item*" value={it.name} onChange={(e) => updateItem(idx, 'name', e.target.value)} />
+                    <Input placeholder="Descrição/justificativa" value={it.description} onChange={(e) => updateItem(idx, 'description', e.target.value)} />
+                    <Input placeholder="Valor (R$)" type="number" step="0.01" value={it.value} onChange={(e) => updateItem(idx, 'value', e.target.value)} />
+                    <Button variant="ghost" size="sm" onClick={() => removeItem(idx)} disabled={form.items.length === 1}><Trash2 size={14} /></Button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '0.5rem' }}>
+                    <Select value={it.product_id} onChange={(e) => selectProduct(idx, e.target.value)}>
+                      <option value="">Peça do estoque (opcional)</option>
+                      {products.map((p) => <option key={p.id} value={p.id}>{p.name} (estoque: {p.stock_quantity})</option>)}
+                    </Select>
+                    {it.product_id && (
+                      <Input placeholder="Qtd." type="number" min="1" value={it.quantity} onChange={(e) => updateQuantity(idx, e.target.value)} />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
