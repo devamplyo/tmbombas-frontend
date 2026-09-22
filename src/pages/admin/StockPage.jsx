@@ -30,6 +30,21 @@ const ORIGIN_OPTIONS = [
   { value: 8, label: '8 — Nacional (importação acima de 70%)' },
 ];
 
+// CSOSN (ICMS do Simples Nacional): lista fechada. Era campo livre de 3 números, então um
+// código inexistente só aparecia quando a Focus recusava a nota, no meio de uma venda.
+const CSOSN_OPTIONS = [
+  { value: '101', label: '101 — Tributada com permissão de crédito' },
+  { value: '102', label: '102 — Tributada sem permissão de crédito' },
+  { value: '103', label: '103 — Isenta por faixa de receita bruta' },
+  { value: '201', label: '201 — Tributada com crédito e com substituição tributária' },
+  { value: '202', label: '202 — Tributada sem crédito e com substituição tributária' },
+  { value: '203', label: '203 — Isenta por faixa de receita e com substituição tributária' },
+  { value: '300', label: '300 — Imune' },
+  { value: '400', label: '400 — Não tributada' },
+  { value: '500', label: '500 — ICMS já cobrado antes (substituição ou antecipação)' },
+  { value: '900', label: '900 — Outros' },
+];
+
 const CATEGORY_OPTIONS = [
   { value: 'PUMP', label: 'Bomba' },
   { value: 'FILTER', label: 'Filtro' },
@@ -73,7 +88,9 @@ export default function StockPage() {
     const digits = (v) => String(v ?? '').replace(/\D/g, '');
     if (digits(form.ncm) && digits(form.ncm).length !== 8) return toast.error('O NCM tem 8 números (ex.: 84137090).');
     if (digits(form.cfop) && digits(form.cfop).length !== 4) return toast.error('O CFOP tem 4 números (ex.: 5102).');
-    if (digits(form.csosn) && digits(form.csosn).length !== 3) return toast.error('O CSOSN tem 3 números (ex.: 102).');
+    if (form.csosn && !CSOSN_OPTIONS.some((o) => o.value === String(form.csosn))) {
+      return toast.error('Escolha um CSOSN da lista. O código que está aí não existe.');
+    }
     try {
       if (editingId) {
         await db.Product.update(editingId, { ...form, sale_price: Number(form.sale_price), stock_quantity: Number(form.stock_quantity), min_stock: Number(form.min_stock) });
@@ -233,7 +250,14 @@ export default function StockPage() {
             <option value="">Padrão da empresa (0 — Nacional)</option>
             {ORIGIN_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </Select>
-          <Input label="CSOSN (3 números)" inputMode="numeric" placeholder="Ex.: 102" value={form.csosn ?? ''} onChange={f('csosn')} />
+          <Select label="CSOSN (ICMS)" value={form.csosn ?? ''} onChange={f('csosn')}>
+            <option value="">Padrão da empresa (102)</option>
+            {CSOSN_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {/* produto salvo antes desta lista pode ter código inexistente: mostra qual é, em vez de aparecer em branco */}
+            {form.csosn && !CSOSN_OPTIONS.some((o) => o.value === String(form.csosn)) && (
+              <option value={form.csosn}>{form.csosn} — código inválido, escolha outro</option>
+            )}
+          </Select>
         </div>
       </Modal>
     </div>
