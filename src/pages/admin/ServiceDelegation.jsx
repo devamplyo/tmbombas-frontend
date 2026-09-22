@@ -31,6 +31,7 @@ export default function ServiceDelegation() {
 
   const save = async () => {
     if (!form.assigned_to_id) return toast.error('Selecione o técnico.');
+    if (!form.service_order_id) return toast.error('Selecione a Ordem de Serviço vinculada.');
     if (!form.description.trim()) return toast.error('Informe a descrição.');
     if (!form.scheduled_date) return toast.error('Informe a data.');
     try {
@@ -70,7 +71,7 @@ export default function ServiceDelegation() {
                 <option value="">Selecione...</option>
                 {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </Select>
-              <Select label="OS vinculada (opcional)" value={form.service_order_id} onChange={f('service_order_id')}>
+              <Select label="OS vinculada*" value={form.service_order_id} onChange={f('service_order_id')}>
                 <option value="">Nenhuma</option>
                 {orders.map((o) => <option key={o.id} value={o.id}>{o.client_name} — {(o.description || '').slice(0, 40)}</option>)}
               </Select>
