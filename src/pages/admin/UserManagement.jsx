@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Eye, EyeOff } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { db } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
@@ -32,7 +32,6 @@ export default function UserManagement() {
   const [form, setForm] = useState(EMPTY);
   const [editingId, setEditingId] = useState(null);
   const [editingAdmin, setEditingAdmin] = useState(false);
-  const [showPasswords, setShowPasswords] = useState({});
 
   const openNew = () => { setForm(EMPTY); setEditingId(null); setEditingAdmin(false); setOpen(true); };
   const openEdit = (u) => {
@@ -113,17 +112,6 @@ export default function UserManagement() {
               { key: 'matricula', header: 'Matrícula' },
               { key: 'roles', header: 'Perfis', render: getRoleLabels },
               { key: 'cargo', header: 'Cargo', render: getRoleLabels },
-              {
-                key: 'plain_password', header: 'Senha', render: (r) => (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                    {showPasswords[r.id] ? r.plain_password : '••••••'}
-                    <button onClick={() => setShowPasswords((p) => ({ ...p, [r.id]: !p[r.id] }))}
-                      style={{ background: 'none', border: 'none', color: 'hsl(var(--muted-foreground))', cursor: 'pointer', lineHeight: 0 }}>
-                      {showPasswords[r.id] ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </span>
-                ),
-              },
               { key: 'is_active', header: 'Status', render: (r) => <Badge tone={r.is_active ? 'success' : 'muted'}>{r.is_active ? 'Ativo' : 'Inativo'}</Badge> },
               {
                 key: 'actions', header: '', align: 'right',
