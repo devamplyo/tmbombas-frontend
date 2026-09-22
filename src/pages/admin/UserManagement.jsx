@@ -22,7 +22,7 @@ const ASSIGNABLE_ROLES = Object.keys(PROFILES).filter((r) => r !== 'admin');
 // Detects the ADM Master (system role, not editable via the UI)
 const isAdminUser = (u) => u?.role === 'admin' || (Array.isArray(u?.roles) && u.roles.includes('admin'));
 
-const EMPTY = { full_name: '', matricula: '', plain_password: '', roles: ['vendedor_interno'], position: '', phone: '', is_active: true };
+const EMPTY = { full_name: '', matricula: '', plain_password: '', roles: ['vendedor_interno'], phone: '', is_active: true };
 
 
 export default function UserManagement() {
@@ -112,7 +112,7 @@ export default function UserManagement() {
               { key: 'full_name', header: 'Nome' },
               { key: 'matricula', header: 'Matrícula' },
               { key: 'roles', header: 'Perfis', render: getRoleLabels },
-              { key: 'position', header: 'Cargo', render: (r) => r.position || '—' },
+              { key: 'cargo', header: 'Cargo', render: getRoleLabels },
               {
                 key: 'plain_password', header: 'Senha', render: (r) => (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -153,7 +153,6 @@ export default function UserManagement() {
           </div>
           <Input label="Matrícula*" value={form.matricula} onChange={(e) => setForm({ ...form, matricula: e.target.value })} disabled={!!editingId} />
           <Input label="Senha" type="text" placeholder={editingId ? '(deixe em branco para manter)' : ''} value={form.plain_password} onChange={(e) => setForm({ ...form, plain_password: e.target.value })} />
-          <Input label="Cargo" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
           <Input label="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
 
           <div style={{ gridColumn: '1/-1' }}>
