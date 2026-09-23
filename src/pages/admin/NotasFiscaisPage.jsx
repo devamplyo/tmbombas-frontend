@@ -380,7 +380,7 @@ export default function NotasFiscaisPage() {
     setEmit(item);
     if (item.type === 'nfe') {
       setConfirmOpen(false);
-      if (!clients) db.Client.list().then(setClients).catch(() => setClients([]));
+      if (!clients) db.Client.list().then((list) => setClients(list.filter((c) => c.validation_status !== 'inativo'))).catch(() => setClients([]));
     } else {
       setConfirmOpen(true); // NFS-e: the client comes from the service order, nothing to ask
     }

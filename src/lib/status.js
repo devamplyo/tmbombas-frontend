@@ -4,6 +4,7 @@ export const CLIENT_STATUS = {
   ativo: { label: 'Ativo', tone: 'success' },
   aguardando_validacao: { label: 'Aguardando validação', tone: 'warning' },
   rejeitado: { label: 'Rejeitado', tone: 'danger' },
+  inativo: { label: 'Inativo', tone: 'muted' },
 };
 
 export const OS_STATUS = {

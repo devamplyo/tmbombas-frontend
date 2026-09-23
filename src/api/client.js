@@ -225,7 +225,10 @@ const CONFIG = {
       // backend, então PENDENTE e REPROVADO (os dois active=false) ficavam
       // indistinguíveis — Rejeitar "funcionava" mas a tela nunca conseguia
       // mostrar. `status` agora vem exposto de verdade (ClientResponse).
-      validation_status: ENUM_TO_CLIENT_STATUS[r.status] || (r.active === false ? 'aguardando_validacao' : 'ativo'),
+      // aprovado mas desativado (excluído com histórico): some das listas e dos seletores
+      validation_status: r.status === 'APROVADO' && r.active === false
+        ? 'inativo'
+        : ENUM_TO_CLIENT_STATUS[r.status] || (r.active === false ? 'aguardando_validacao' : 'ativo'),
       is_active: r.active,
       created_date: r.created_at,
       created_at: r.created_at,
@@ -954,6 +957,15 @@ export async function approveClient(id) {
 
 export async function rejectClient(id, reason) {
   return req('POST', `/clients/${id}/reject`, { reason });
+}
+
+/** Deactivates an approved client (leaves the selection lists, history stays); activateClient undoes it. */
+export async function deactivateClient(id) {
+  return req('POST', `/clients/${id}/deactivate`);
+}
+
+export async function activateClient(id) {
+  return req('POST', `/clients/${id}/activate`);
 }
 
 /* ─────────────────────────  Cancelamento de venda  ───────────────────────── */

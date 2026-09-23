@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Plus, Check, X, User } from 'lucide-react';
-import { db, getMaintenancePlans, approveClient, rejectClient } from '@/api/client';
+import { Plus, Check, X, User, Ban } from 'lucide-react';
+import { db, getMaintenancePlans, approveClient, rejectClient, deactivateClient, activateClient } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
@@ -102,6 +102,30 @@ export default function ClientsPage() {
     }
   };
 
+  const [deactivating, setDeactivating] = useState(null);
+
+  const confirmDeactivate = async () => {
+    if (!deactivating) return;
+    try {
+      await deactivateClient(deactivating.id);
+      toast.success('Cliente desativado.');
+      setDeactivating(null);
+      reload();
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível desativar o cliente.');
+    }
+  };
+
+  const activate = async (client) => {
+    try {
+      await activateClient(client.id);
+      toast.success('Cliente ativado.');
+      reload();
+    } catch (e) {
+      toast.error(e.message || 'Não foi possível ativar o cliente.');
+    }
+  };
+
   const openReject = (client) => { setRejecting(client); setRejectReason(''); };
   const closeReject = () => { setRejecting(null); setRejectReason(''); };
 
@@ -161,6 +185,16 @@ export default function ClientsPage() {
                       </>
                     )}
                     {overdueClientIds.has(r.id) && <Badge tone="danger">Manutenção vencida</Badge>}
+                    {r.validation_status === 'ativo' && (
+                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setDeactivating(r); }}>
+                        <Ban size={14} /> Desativar
+                      </Button>
+                    )}
+                    {r.validation_status === 'inativo' && (
+                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); activate(r); }}>
+                        <Check size={14} /> Ativar
+                      </Button>
+                    )}
                     <Badge tone={CLIENT_STATUS[r.validation_status]?.tone}>
                       {CLIENT_STATUS[r.validation_status]?.label || r.validation_status}
                     </Badge>
@@ -226,6 +260,25 @@ export default function ClientsPage() {
             <Input label="Motivo da rejeição*" value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)} placeholder="Ex: documento inválido" autoFocus />
           </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={!!deactivating}
+        onClose={() => setDeactivating(null)}
+        title="Desativar cliente"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setDeactivating(null)}>Cancelar</Button>
+            <Button variant="danger" onClick={confirmDeactivate}>Desativar</Button>
+          </>
+        }
+      >
+        {deactivating && (
+          <p style={{ fontSize: '0.88rem', margin: 0 }}>
+            Desativar o cliente <strong>{deactivating.name}</strong>? Ele deixa de aparecer para escolha (PDV, orçamento,
+            nota fiscal e outros), mas o histórico é mantido. Você pode ativar de novo quando quiser.
+          </p>
         )}
       </Modal>
     </div>
