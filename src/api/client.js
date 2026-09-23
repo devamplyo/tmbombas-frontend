@@ -285,6 +285,8 @@ const CONFIG = {
     decode: (r) => ({
       id: r.id,
       client_name: r.customer_name,
+      registered_client_id: r.client_id,
+      registered_client_name: r.client_name,
       seller_id: r.seller_id,
       seller_name: r.seller_name,
       total_amount: r.total,
@@ -308,6 +310,7 @@ const CONFIG = {
     encode: (d) =>
       clean({
         customer_name: d.client_name ?? d.customer_name ?? '',
+        client_id: numOrNull(d.registered_client_id),
         payment_method: PAYMENT_METHOD_TO_ENUM[d.payment_method] || undefined,
         items: (d.items || []).map((i) => ({
           product_id: numOrNull(i.product_id),

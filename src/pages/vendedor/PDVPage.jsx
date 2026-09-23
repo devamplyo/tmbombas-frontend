@@ -22,10 +22,12 @@ export default function PDVPage() {
   const { user } = useOutletContext();
   const toast = useToast();
   const { data: products, loading, reload: reloadProducts } = useAsyncData(() => db.Product.filter({ is_active: true }), []);
+  const { data: registeredClients } = useAsyncData(() => db.Client.filter({ validation_status: 'ativo' }), []);
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState(loadCart);
   const [payment, setPayment] = useState('dinheiro');
   const [clientName, setClientName] = useState('');
+  const [registeredClientId, setRegisteredClientId] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [lastSale, setLastSale] = useState(null);
   const searchRef = useRef();
@@ -77,13 +79,15 @@ export default function PDVPage() {
       // achado F3: o payload nunca incluía a forma de pagamento escolhida —
       // toda venda virava "Dinheiro" no lançamento financeiro, e a coluna
       // Pagamento em Vendas do dia sempre mostrava "—".
+      const chosenClient = (registeredClients || []).find((c) => String(c.id) === String(registeredClientId));
       const sale = await db.Sale.create({
-        client_name: clientName,
+        client_name: chosenClient ? chosenClient.name : clientName,
+        registered_client_id: registeredClientId || null,
         payment_method: payment,
         items: cart,
       });
-      setLastSale({ id: sale.id, client_name: clientName, items: cart, total: totalAmount, date: new Date() });
-      setCart([]); setClientName(''); setConfirmOpen(false);
+      setLastSale({ id: sale.id, client_name: chosenClient ? chosenClient.name : clientName, items: cart, total: totalAmount, date: new Date() });
+      setCart([]); setClientName(''); setRegisteredClientId(''); setConfirmOpen(false);
       toast.success(`Venda ${String(sale.id).slice(-6).toUpperCase()} concluída!`);
       reloadProducts();
     } catch (e) { toast.error(e.message); }
@@ -165,7 +169,15 @@ export default function PDVPage() {
       <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} title="Confirmar venda"
         footer={<><Button variant="ghost" onClick={() => setConfirmOpen(false)}>Voltar</Button><Button onClick={confirmSale}><CheckCircle size={16} /> Confirmar</Button></>}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <Input label="Nome do cliente (opcional)" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Ex: João da Silva" />
+          <Select label="Cliente cadastrado (opcional)" value={registeredClientId} onChange={(e) => setRegisteredClientId(e.target.value)}>
+            <option value="">Não encontrado — digitar nome abaixo</option>
+            {(registeredClients || []).map((c) => (
+              <option key={c.id} value={c.id}>{c.name}{c.document ? ` — ${c.document}` : ''}</option>
+            ))}
+          </Select>
+          {!registeredClientId && (
+            <Input label="Nome do cliente (opcional)" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Ex: João da Silva" />
+          )}
           <Select label="Forma de pagamento" value={payment} onChange={(e) => setPayment(e.target.value)}>
             <option value="dinheiro">Dinheiro</option>
             <option value="pix">PIX</option>
