@@ -20,7 +20,8 @@ import shared from '../shared.module.css';
 
 const EMPTY_ITEM = { name: '', description: '', value: '', product_id: '', quantity: 1 };
 const EMPTY_ORCAMENTO = { type: 'orcamento', client_id: '', scheduled_date: '', items: [{ ...EMPTY_ITEM }] };
-const EMPTY_OS = { type: 'os', client_id: '', description: '', service_value: '', scheduled_date: '' };
+const EMPTY_MATERIAL = { product_id: '', quantity: 1 };
+const EMPTY_OS = { type: 'os', client_id: '', description: '', service_value: '', scheduled_date: '', materials: [] };
 
 const TABS = [
   { value: 'orcamento', label: 'Orçamento' },
@@ -45,7 +46,7 @@ export default function FCOOrcamentosPage() {
   const [saving, setSaving] = useState(false);
 
   const blankFor = (type) =>
-    type === 'orcamento' ? { ...EMPTY_ORCAMENTO, items: [{ ...EMPTY_ITEM }] } : { ...EMPTY_OS };
+    type === 'orcamento' ? { ...EMPTY_ORCAMENTO, items: [{ ...EMPTY_ITEM }] } : { ...EMPTY_OS, materials: [] };
 
   const openNew = (type) => {
     setForm(blankFor(type));
@@ -94,6 +95,21 @@ export default function FCOOrcamentosPage() {
   const addItem = () => setForm({ ...form, items: [...form.items, { ...EMPTY_ITEM }] });
   const removeItem = (idx) => setForm({ ...form, items: form.items.filter((_, i) => i !== idx) });
 
+  // material do estoque da OS: o valor sai sempre do preço do produto x quantidade
+  const materialLines = (materials) => (materials || [])
+    .filter((m) => m.product_id)
+    .map((m) => {
+      const product = data.products.find((p) => String(p.id) === String(m.product_id));
+      const quantity = Number(m.quantity) || 0;
+      return { product, quantity, subtotal: product ? product.sale_price * quantity : 0 };
+    })
+    .filter((l) => l.product);
+  const osTotal = (f) => (Number(f.service_value) || 0) + materialLines(f.materials).reduce((sum, l) => sum + l.subtotal, 0);
+  const updateMaterial = (idx, key, value) =>
+    setForm({ ...form, materials: form.materials.map((m, i) => (i === idx ? { ...m, [key]: value } : m)) });
+  const addMaterial = () => setForm({ ...form, materials: [...form.materials, { ...EMPTY_MATERIAL }] });
+  const removeMaterial = (idx) => setForm({ ...form, materials: form.materials.filter((_, i) => i !== idx) });
+
   // the button only checks and opens the "confira antes de enviar" screen — nothing is sent yet
   const askConfirm = () => {
     if (!form.client_id) return toast.error('Selecione o cliente.');
@@ -101,6 +117,8 @@ export default function FCOOrcamentosPage() {
       if (!form.items.some((it) => it.name.trim())) return toast.error('Adicione pelo menos um item com nome.');
     } else if (!form.description.trim()) {
       return toast.error('Informe a descrição.');
+    } else if (materialLines(form.materials).some((l) => l.quantity < 1)) {
+      return toast.error('Informe a quantidade do material.');
     }
     setConfirmando(true);
   };
@@ -125,13 +143,22 @@ export default function FCOOrcamentosPage() {
         });
         toast.success('Orçamento criado e enviado para validação.');
       } else {
+        const serviceValue = Number(form.service_value) || 0;
+        const materialItems = materialLines(form.materials).map((l) => ({
+          name: l.product.name, description: '', value: l.subtotal, product_id: l.product.id, quantity: l.quantity,
+        }));
+        // com material, o valor da OS é a soma dos itens: o serviço entra como uma linha própria
+        const osItems = materialItems.length
+          ? [...(serviceValue > 0 ? [{ name: 'Serviço', description: '', value: serviceValue, product_id: '', quantity: 1 }] : []), ...materialItems]
+          : undefined;
         await db.ServiceOrder.create({
           type: 'os',
           client_id: form.client_id,
           client_name: client?.name || '',
           description: form.description,
           scheduled_date: form.scheduled_date || null,
-          service_value: Number(form.service_value) || 0,
+          service_value: materialItems.length ? osTotal(form) : serviceValue,
+          items: osItems,
           assigned_to_id: user.id,
           assigned_to_name: user.full_name,
           status: 'aguardando_validacao',
@@ -212,6 +239,37 @@ export default function FCOOrcamentosPage() {
           )}
         </div>
 
+        {form.type === 'os' && (
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>Material do estoque (opcional)</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {form.materials.map((m, idx) => {
+                const product = products.find((p) => String(p.id) === String(m.product_id));
+                return (
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 90px 100px auto', gap: '0.5rem', alignItems: 'start' }}>
+                    <Select value={m.product_id} onChange={(e) => updateMaterial(idx, 'product_id', e.target.value)}>
+                      <option value="">Escolha o material</option>
+                      {products.map((p) => <option key={p.id} value={p.id}>{p.name} (estoque: {p.stock_quantity}) — {brl(p.sale_price)}</option>)}
+                    </Select>
+                    <Input placeholder="Qtd." type="number" min="1" value={m.quantity} onChange={(e) => updateMaterial(idx, 'quantity', e.target.value)} />
+                    <span style={{ fontSize: '0.85rem', textAlign: 'right', paddingTop: '0.6rem' }}>
+                      {product ? brl(product.sale_price * (Number(m.quantity) || 0)) : '—'}
+                    </span>
+                    <Button variant="ghost" size="sm" onClick={() => removeMaterial(idx)}><Trash2 size={14} /></Button>
+                  </div>
+                );
+              })}
+            </div>
+            <Button variant="outline" size="sm" style={{ marginTop: '0.6rem' }} onClick={addMaterial}><Plus size={14} /> Adicionar material</Button>
+            <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>
+              O valor do material vem do preço do estoque e a baixa acontece ao concluir o serviço.
+            </p>
+            <div style={{ marginTop: '0.6rem', fontSize: '0.95rem', textAlign: 'right' }}>
+              Total (serviço + material): <strong>{brl(osTotal(form))}</strong>
+            </div>
+          </div>
+        )}
+
         {form.type === 'orcamento' && (
           <div style={{ marginTop: '1rem' }}>
             <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>Itens do orçamento</p>
@@ -221,7 +279,7 @@ export default function FCOOrcamentosPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px auto', gap: '0.5rem', alignItems: 'start' }}>
                     <Input placeholder="Nome do item*" value={it.name} onChange={(e) => updateItem(idx, 'name', e.target.value)} />
                     <Input placeholder="Descrição/justificativa" value={it.description} onChange={(e) => updateItem(idx, 'description', e.target.value)} />
-                    <Input placeholder="Valor (R$)" type="number" step="0.01" value={it.value} onChange={(e) => updateItem(idx, 'value', e.target.value)} />
+                    <Input placeholder="Valor (R$)" type="number" step="0.01" value={it.value} disabled={!!it.product_id} onChange={(e) => updateItem(idx, 'value', e.target.value)} />
                     <Button variant="ghost" size="sm" onClick={() => removeItem(idx)} disabled={form.items.length === 1}><Trash2 size={14} /></Button>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '0.5rem' }}>
@@ -255,8 +313,10 @@ export default function FCOOrcamentosPage() {
         ]}
         items={form.type === 'orcamento'
           ? form.items.filter((it) => it.name.trim()).map((it) => ({ title: it.name, subtitle: it.description, amount: Number(it.value) || 0 }))
-          : []}
-        total={form.type === 'orcamento' ? itemTotal(form.items.filter((it) => it.name.trim())) : undefined}
+          : materialLines(form.materials).map((l) => ({ title: l.product.name, subtitle: `${l.quantity} × ${brl(l.product.sale_price)}`, amount: l.subtotal }))}
+        total={form.type === 'orcamento'
+          ? itemTotal(form.items.filter((it) => it.name.trim()))
+          : (materialLines(form.materials).length ? osTotal(form) : undefined)}
         note={form.type === 'os' ? { label: 'Descrição', text: form.description } : undefined}
         saving={saving}
         onCancel={() => setConfirmando(false)}
