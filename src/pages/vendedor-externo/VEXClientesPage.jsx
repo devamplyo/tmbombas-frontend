@@ -16,7 +16,10 @@ import { Input, Select } from '@/components/ui/Field';
 import { CLIENT_STATUS, CLIENT_TYPE } from '@/lib/status';
 import shared from '../shared.module.css';
 
-const EMPTY = { name: '', type: 'pessoa_juridica', document: '', email: '', phone: '', city_name: '', state: '', contact_person: '' };
+const EMPTY = {
+  name: '', type: 'pessoa_juridica', document: '', email: '', phone: '', contact_person: '',
+  street: '', number: '', district: '', city_name: '', state: '', zip_code: '',
+};
 
 export default function VEXClientesPage() {
   const { user } = useOutletContext();
@@ -29,8 +32,15 @@ export default function VEXClientesPage() {
   const [saving, setSaving] = useState(false);
 
   // the button only checks and opens the "confira antes de enviar" screen — nothing is sent yet
+  // endereço incompleto passava aqui e só quebrava depois, na hora de emitir a nota do ADM
   const askConfirm = () => {
     if (!form.name.trim()) return toast.error('Informe o nome.');
+    if (!form.street.trim()) return toast.error('Informe a rua.');
+    if (!form.number.trim()) return toast.error('Informe o número.');
+    if (!form.district.trim()) return toast.error('Informe o bairro.');
+    if (!form.city_name.trim()) return toast.error('Informe a cidade.');
+    if (form.state.trim().length !== 2) return toast.error('Informe a UF (2 letras).');
+    if (form.zip_code.replace(/\D/g, '').length !== 8) return toast.error('Informe o CEP (8 números).');
     setConfirmando(true);
   };
 
@@ -89,8 +99,12 @@ export default function VEXClientesPage() {
           <Input label="E-mail" value={form.email} onChange={f('email')} />
           <Input label="Telefone" value={form.phone} onChange={f('phone')} />
           <Input label="Contato" value={form.contact_person} onChange={f('contact_person')} />
-          <Input label="Cidade" value={form.city_name} onChange={f('city_name')} />
-          <Input label="UF" value={form.state} onChange={f('state')} />
+          <Input label="Rua*" value={form.street} onChange={f('street')} />
+          <Input label="Número*" value={form.number} onChange={f('number')} />
+          <Input label="Bairro*" value={form.district} onChange={f('district')} />
+          <Input label="Cidade*" value={form.city_name} onChange={f('city_name')} />
+          <Input label="UF*" maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })} />
+          <Input label="CEP*" inputMode="numeric" value={form.zip_code} onChange={f('zip_code')} />
         </div>
       </Modal>
 
@@ -103,8 +117,9 @@ export default function VEXClientesPage() {
           { label: 'E-mail', value: form.email },
           { label: 'Telefone', value: form.phone },
           { label: 'Contato', value: form.contact_person },
-          { label: 'Cidade', value: form.city_name },
-          { label: 'UF', value: form.state },
+          { label: 'Endereço', value: `${form.street}, ${form.number} - ${form.district}` },
+          { label: 'Cidade', value: `${form.city_name}/${form.state}` },
+          { label: 'CEP', value: form.zip_code },
         ]}
         saving={saving}
         onCancel={() => setConfirmando(false)}

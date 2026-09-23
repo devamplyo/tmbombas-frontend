@@ -61,9 +61,17 @@ export default function ClientsPage() {
 
   // achado F11: o backend exige documento (@NotBlank, único), mas o
   // formulário não avisava — o erro só chegava cru depois do 400 do servidor.
+  // endereço incompleto tem o mesmo problema: o cadastro deixava salvar sem
+  // rua/bairro/CEP, e o erro só aparecia depois, no meio da emissão da NF-e.
   const save = async () => {
     if (!form.name.trim()) return toast.error('Informe o nome do cliente.');
     if (!form.document.trim()) return toast.error('Informe o documento (CPF/CNPJ).');
+    if (!form.street.trim()) return toast.error('Informe a rua.');
+    if (!form.number.trim()) return toast.error('Informe o número.');
+    if (!form.district.trim()) return toast.error('Informe o bairro.');
+    if (!form.city_name.trim()) return toast.error('Informe a cidade.');
+    if (form.state.trim().length !== 2) return toast.error('Informe a UF (2 letras).');
+    if (form.zip_code.replace(/\D/g, '').length !== 8) return toast.error('Informe o CEP (8 números).');
     try {
       // `address: undefined` so the flat fields of the form (not the old address object) are what gets saved
       const payload = { ...form, address: undefined };
@@ -185,13 +193,13 @@ export default function ClientsPage() {
           <Input label="Documento (CPF/CNPJ)*" value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} />
           <Input label="E-mail" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <Input label="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <Input label="Rua" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
-          <Input label="Número" value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} />
+          <Input label="Rua*" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
+          <Input label="Número*" value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} />
           <Input label="Complemento" value={form.complement} onChange={(e) => setForm({ ...form, complement: e.target.value })} />
-          <Input label="Bairro" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
-          <Input label="Cidade" value={form.city_name} onChange={(e) => setForm({ ...form, city_name: e.target.value })} />
-          <Input label="UF" maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })} />
-          <Input label="CEP" inputMode="numeric" value={form.zip_code} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} />
+          <Input label="Bairro*" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
+          <Input label="Cidade*" value={form.city_name} onChange={(e) => setForm({ ...form, city_name: e.target.value })} />
+          <Input label="UF*" maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })} />
+          <Input label="CEP*" inputMode="numeric" value={form.zip_code} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} />
           <div style={{ gridColumn: '1 / -1' }}>
             <Input label="Inscrição estadual (só empresa contribuinte de ICMS)" value={form.state_registration}
               onChange={(e) => setForm({ ...form, state_registration: e.target.value })} placeholder="Deixe em branco se não tiver" />
