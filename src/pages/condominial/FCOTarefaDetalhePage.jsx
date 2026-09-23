@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';
-import { ArrowLeft, Play, CheckCircle, Camera, X } from 'lucide-react';
-import { db, addServiceRecord, listServiceRecords } from '@/api/client';
+import { ArrowLeft, Play, CheckCircle, Camera, X, Plus, Trash2 } from 'lucide-react';
+import { db, addServiceRecord, listServiceRecords, listServiceMaterials, addServiceMaterial, removeServiceMaterial } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
@@ -11,8 +11,8 @@ import Button from '@/components/ui/Button';
 import ConfirmSubmit from '@/components/ui/ConfirmSubmit';
 import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
-import { Textarea } from '@/components/ui/Field';
-import { dateBR, dateTimeBR } from '@/lib/format';
+import { Input, Select, Textarea } from '@/components/ui/Field';
+import { brl, dateBR, dateTimeBR } from '@/lib/format';
 import { TASK_STATUS, OS_STATUS } from '@/lib/status';
 import shared from '../shared.module.css';
 
@@ -41,6 +41,15 @@ export default function FCOTarefaDetalhePage() {
     [data?.order?.id],
   );
 
+  const { data: products } = useAsyncData(() => db.Product.filter({ is_active: true }), []);
+  const { data: materials, reload: reloadMaterials } = useAsyncData(
+    () => (data?.order?.id ? listServiceMaterials(data.order.id) : Promise.resolve([])),
+    [data?.order?.id],
+  );
+  const [materialProductId, setMaterialProductId] = useState('');
+  const [materialQty, setMaterialQty] = useState('1');
+  const [addingMaterial, setAddingMaterial] = useState(false);
+
   const startTask = async () => {
     await db.ServiceTask.update(id, { status: 'em_andamento', started_at: new Date().toISOString() });
     if (data.order) await db.ServiceOrder.update(data.order.id, { status: 'em_execucao' });
@@ -48,11 +57,42 @@ export default function FCOTarefaDetalhePage() {
     reload();
   };
 
+  // a OS é concluída primeiro: é ali que a baixa do estoque pode falhar (estoque insuficiente),
+  // e a tarefa não deve ficar concluída com a OS ainda aberta
   const finishTask = async () => {
-    await db.ServiceTask.update(id, { status: 'concluido', completed_at: new Date().toISOString() });
-    if (data.order) await db.ServiceOrder.update(data.order.id, { status: 'concluida', completion_date: new Date().toISOString() });
-    toast.success('Serviço concluído.');
-    reload();
+    try {
+      if (data.order) await db.ServiceOrder.update(data.order.id, { status: 'concluida', completion_date: new Date().toISOString() });
+      await db.ServiceTask.update(id, { status: 'concluido', completed_at: new Date().toISOString() });
+      toast.success('Serviço concluído.');
+      reload();
+    } catch (e) {
+      toast.error(e.message);
+    }
+  };
+
+  const addMaterial = async () => {
+    if (!materialProductId) return toast.error('Escolha o material.');
+    if (!(Number(materialQty) >= 1)) return toast.error('Informe a quantidade.');
+    setAddingMaterial(true);
+    try {
+      await addServiceMaterial(data.order.id, { productId: materialProductId, quantity: materialQty });
+      setMaterialProductId('');
+      setMaterialQty('1');
+      reloadMaterials();
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setAddingMaterial(false);
+    }
+  };
+
+  const removeMaterial = async (materialId) => {
+    try {
+      await removeServiceMaterial(data.order.id, materialId);
+      reloadMaterials();
+    } catch (e) {
+      toast.error(e.message);
+    }
   };
 
   const addPhotos = (e) => {
@@ -229,6 +269,53 @@ export default function FCOTarefaDetalhePage() {
             <Button style={{ marginTop: '1rem' }} onClick={askConfirm} disabled={saving}>
               {saving ? 'Salvando...' : 'Salvar registro'}
             </Button>
+          </CardBody>
+        </Card>
+      )}
+
+      {order && (
+        <Card style={{ marginTop: '1.25rem' }}>
+          <CardHeader
+            title="Material utilizado"
+            subtitle="O valor vem do preço do estoque. A baixa no estoque acontece ao finalizar o serviço."
+          />
+          <CardBody>
+            {canRegister && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px auto', gap: '0.6rem', alignItems: 'start', marginBottom: '1rem' }}>
+                <Select value={materialProductId} onChange={(e) => setMaterialProductId(e.target.value)}>
+                  <option value="">Escolha o material do estoque</option>
+                  {(products || []).map((p) => (
+                    <option key={p.id} value={p.id}>{p.name} (estoque: {p.stock_quantity}) — {brl(p.sale_price)}</option>
+                  ))}
+                </Select>
+                <Input type="number" min="1" placeholder="Qtd." value={materialQty} onChange={(e) => setMaterialQty(e.target.value)} />
+                <Button variant="outline" onClick={addMaterial} disabled={addingMaterial}>
+                  <Plus size={16} /> Adicionar
+                </Button>
+              </div>
+            )}
+
+            {!materials?.length ? (
+              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem' }}>Nenhum material informado.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.88rem' }}>
+                {materials.map((m) => (
+                  <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+                    <span>{m.product_name} × {m.quantity}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      {brl(m.subtotal)}
+                      {canRegister && (
+                        <Button variant="ghost" size="sm" onClick={() => removeMaterial(m.id)}><Trash2 size={14} /></Button>
+                      )}
+                    </span>
+                  </div>
+                ))}
+                <div style={{ borderTop: '1px solid hsl(var(--border))', marginTop: '0.25rem', paddingTop: '0.5rem', display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                  <span>Total do material</span>
+                  <span>{brl(materials.reduce((s, m) => s + m.subtotal, 0))}</span>
+                </div>
+              </div>
+            )}
           </CardBody>
         </Card>
       )}

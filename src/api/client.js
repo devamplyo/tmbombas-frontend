@@ -715,6 +715,35 @@ export async function listServiceRecords(orderId) {
   }
 }
 
+/** Stock material reported as used on a service order (price comes from the stock, never typed). */
+export async function listServiceMaterials(orderId) {
+  try {
+    const r = await req('GET', `/technician/service-orders/${orderId}/materials`);
+    return (r || []).map((m) => ({
+      id: m.id,
+      product_id: m.product_id,
+      product_name: m.product_name,
+      quantity: m.quantity,
+      unit_price: Number(m.unit_price),
+      subtotal: Number(m.subtotal),
+    }));
+  } catch (e) {
+    console.error('[API] falha ao listar material da OS:', e.message);
+    return [];
+  }
+}
+
+export async function addServiceMaterial(orderId, { productId, quantity }) {
+  return req('POST', `/technician/service-orders/${orderId}/materials`, {
+    product_id: Number(productId),
+    quantity: Number(quantity),
+  });
+}
+
+export async function removeServiceMaterial(orderId, materialId) {
+  return req('DELETE', `/technician/service-orders/${orderId}/materials/${materialId}`);
+}
+
 /* ─────────────────────────  Collaborators (ADM Master)  ───────────────────────── */
 
 /** Full history of a collaborator (sales if a salesperson, service orders if a technician). */

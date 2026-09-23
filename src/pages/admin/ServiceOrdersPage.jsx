@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, X, Eye } from 'lucide-react';
-import { db, getReceivables, confirmReceivable } from '@/api/client';
+import { db, getReceivables, confirmReceivable, listServiceMaterials } from '@/api/client';
 import useAsyncData from '@/hooks/useAsyncData';
 import { useToast } from '@/components/ui/Toast';
 import PageHeader from '@/components/ui/PageHeader';
@@ -20,6 +20,29 @@ const TABS = [
   { value: 'recusadas', label: 'Recusadas', match: (s) => s === 'nao_validada' || s === 'cancelada' },
   { value: 'concluidas', label: 'Concluídas', match: (s) => s === 'concluida' },
 ];
+
+// material que o técnico informou ter usado na execução (valor vem do preço do estoque)
+function MaterialsUsed({ orderId }) {
+  const { data: materials } = useAsyncData(() => listServiceMaterials(orderId), [orderId]);
+  if (!materials?.length) return null;
+  return (
+    <div>
+      <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Material utilizado</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.88rem' }}>
+        {materials.map((m) => (
+          <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>{m.product_name} × {m.quantity}</span>
+            <span>{brl(m.subtotal)}</span>
+          </div>
+        ))}
+        <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '0.4rem', display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+          <span>Total do material</span>
+          <span>{brl(materials.reduce((s, m) => s + m.subtotal, 0))}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ServiceOrdersPage() {
   const toast = useToast();
@@ -134,6 +157,8 @@ export default function ServiceOrdersPage() {
               {detail.assigned_to_name && <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Técnico</span><br />{detail.assigned_to_name}</div>}
               <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Agendado</span><br />{dateBR(detail.scheduled_date)} {detail.scheduled_time || ''}</div>
             </div>
+
+            <MaterialsUsed orderId={detail.id} />
 
             {transitions[detail.status]?.length > 0 && (
               <div>
